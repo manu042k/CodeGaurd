@@ -32,16 +32,16 @@ export default function Home() {
             {session ? (
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href="/repositories"
+                  href="/projects"
                   className="inline-flex items-center px-8 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors duration-200"
                 >
-                  View Your Repositories
+                  View Your Projects
                 </Link>
                 <Link
-                  href="/dashboard"
+                  href="/repositories"
                   className="inline-flex items-center px-8 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200"
                 >
-                  Go to Dashboard
+                  Import from GitHub
                 </Link>
               </div>
             ) : (
