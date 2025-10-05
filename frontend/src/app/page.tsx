@@ -1,17 +1,17 @@
-'use client'
+"use client";
 
-import { useSession } from 'next-auth/react'
-import Header from '@/components/Header'
-import Link from 'next/link'
-import { FaShieldAlt, FaCode, FaLock, FaGithub } from 'react-icons/fa'
+import { useSession } from "next-auth/react";
+import Header from "@/components/Header";
+import Link from "next/link";
+import { FaShieldAlt, FaCode, FaLock, FaGithub } from "react-icons/fa";
 
 export default function Home() {
-  const { data: session } = useSession()
+  const { data: session } = useSession();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Header />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Hero Section */}
         <div className="py-20 text-center">
@@ -20,26 +20,28 @@ export default function Home() {
               <FaShieldAlt className="h-16 w-16 text-indigo-600" />
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Secure Your Code with <span className="text-indigo-600">CodeGuard</span>
+              Secure Your Code with{" "}
+              <span className="text-indigo-600">CodeGuard</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Protect your applications with advanced security analysis, vulnerability detection, 
-              and automated code protection powered by AI.
+              Protect your applications with advanced security analysis,
+              vulnerability detection, and automated code protection powered by
+              AI.
             </p>
-            
+
             {session ? (
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href="/dashboard"
+                  href="/repositories"
                   className="inline-flex items-center px-8 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors duration-200"
                 >
-                  Go to Dashboard
+                  View Your Repositories
                 </Link>
                 <Link
-                  href="/projects"
+                  href="/dashboard"
                   className="inline-flex items-center px-8 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200"
                 >
-                  View Projects
+                  Go to Dashboard
                 </Link>
               </div>
             ) : (
@@ -82,8 +84,8 @@ export default function Home() {
                 Advanced Security Analysis
               </h3>
               <p className="text-gray-600">
-                Real-time vulnerability detection and security analysis powered by AI 
-                to keep your code safe from threats.
+                Real-time vulnerability detection and security analysis powered
+                by AI to keep your code safe from threats.
               </p>
             </div>
 
@@ -95,7 +97,7 @@ export default function Home() {
                 Code Quality Monitoring
               </h3>
               <p className="text-gray-600">
-                Continuous monitoring of code quality with detailed reports and 
+                Continuous monitoring of code quality with detailed reports and
                 actionable insights for improvement.
               </p>
             </div>
@@ -108,8 +110,8 @@ export default function Home() {
                 Automated Protection
               </h3>
               <p className="text-gray-600">
-                Automatic security patches and protection mechanisms to safeguard 
-                your applications without manual intervention.
+                Automatic security patches and protection mechanisms to
+                safeguard your applications without manual intervention.
               </p>
             </div>
           </div>
@@ -123,7 +125,8 @@ export default function Home() {
                 Ready to Secure Your Code?
               </h2>
               <p className="text-xl text-gray-600 mb-8">
-                Join thousands of developers who trust CodeGuard to protect their applications.
+                Join thousands of developers who trust CodeGuard to protect
+                their applications.
               </p>
               <Link
                 href="/auth/signin"
@@ -137,5 +140,5 @@ export default function Home() {
         )}
       </main>
     </div>
-  )
+  );
 }

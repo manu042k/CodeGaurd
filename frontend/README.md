@@ -13,7 +13,7 @@ A Next.js application with GitHub SSO authentication for the CodeGuard security 
 
 ## Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 - GitHub OAuth App credentials
 

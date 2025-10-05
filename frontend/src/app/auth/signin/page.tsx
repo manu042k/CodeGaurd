@@ -1,19 +1,19 @@
-'use client'
+"use client";
 
-import { signIn, getProviders } from 'next-auth/react'
-import { useEffect, useState } from 'react'
-import { FaGithub } from 'react-icons/fa'
+import { signIn, getProviders } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { FaGithub } from "react-icons/fa";
 
 export default function SignIn() {
-  const [providers, setProviders] = useState<any>(null)
+  const [providers, setProviders] = useState<any>(null);
 
   useEffect(() => {
     const setUpProviders = async () => {
-      const response = await getProviders()
-      setProviders(response)
-    }
-    setUpProviders()
-  }, [])
+      const response = await getProviders();
+      setProviders(response);
+    };
+    setUpProviders();
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -26,13 +26,15 @@ export default function SignIn() {
             Sign in to your account to continue
           </p>
         </div>
-        
+
         <div className="mt-8 space-y-4">
           {providers &&
             Object.values(providers).map((provider: any) => (
               <div key={provider.name}>
                 <button
-                  onClick={() => signIn(provider.id, { callbackUrl: '/' })}
+                  onClick={() =>
+                    signIn(provider.id, { callbackUrl: "/repositories" })
+                  }
                   className="w-full flex justify-center items-center gap-3 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200"
                 >
                   <FaGithub className="w-5 h-5" />
@@ -41,7 +43,7 @@ export default function SignIn() {
               </div>
             ))}
         </div>
-        
+
         <div className="text-center">
           <p className="text-xs text-gray-500">
             By signing in, you agree to our Terms of Service and Privacy Policy
@@ -49,5 +51,5 @@ export default function SignIn() {
         </div>
       </div>
     </div>
-  )
+  );
 }

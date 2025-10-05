@@ -1,11 +1,11 @@
-'use client'
+"use client";
 
-import { useSession, signIn, signOut } from 'next-auth/react'
-import Link from 'next/link'
-import { FaGithub, FaUser, FaSignOutAlt } from 'react-icons/fa'
+import { useSession, signIn, signOut } from "next-auth/react";
+import Link from "next/link";
+import { FaGithub, FaUser, FaSignOutAlt } from "react-icons/fa";
 
 export default function Header() {
-  const { data: session, status } = useSession()
+  const { data: session, status } = useSession();
 
   return (
     <header className="bg-white shadow-sm border-b">
@@ -29,10 +29,10 @@ export default function Header() {
               Dashboard
             </Link>
             <Link
-              href="/projects"
+              href="/repositories"
               className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
             >
-              Projects
+              Repositories
             </Link>
             <Link
               href="/docs"
@@ -44,7 +44,7 @@ export default function Header() {
 
           {/* Authentication */}
           <div className="flex items-center space-x-4">
-            {status === 'loading' ? (
+            {status === "loading" ? (
               <div className="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
             ) : session ? (
               <div className="flex items-center space-x-3">
@@ -52,7 +52,7 @@ export default function Header() {
                   {session.user?.image ? (
                     <img
                       src={session.user.image}
-                      alt={session.user.name || 'User'}
+                      alt={session.user.name || "User"}
                       className="h-8 w-8 rounded-full"
                     />
                   ) : (
@@ -63,7 +63,7 @@ export default function Header() {
                   </span>
                 </div>
                 <button
-                  onClick={() => signOut()}
+                  onClick={() => signOut({ callbackUrl: "/" })}
                   className="inline-flex items-center space-x-1 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   <FaSignOutAlt className="h-4 w-4" />
@@ -72,7 +72,7 @@ export default function Header() {
               </div>
             ) : (
               <button
-                onClick={() => signIn('github')}
+                onClick={() => signIn("github")}
                 className="inline-flex items-center space-x-2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors duration-200"
               >
                 <FaGithub className="h-4 w-4" />
@@ -83,5 +83,5 @@ export default function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }
