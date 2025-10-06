@@ -1,123 +1,125 @@
-'use client'
+"use client";
 
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import Header from '@/components/Header'
-import ProjectCard from '@/components/ProjectCard'
-import { Project } from '@/types/project'
-import { projectApi, analysisApi, mockData } from '@/lib/api'
-import { FaPlus, FaGithub, FaFilter, FaSearch } from 'react-icons/fa'
-import Link from 'next/link'
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import Header from "@/components/Header";
+import ProjectCard from "@/components/ProjectCard";
+import { Project } from "@/types/project";
+import { projectApi, analysisApi, mockData } from "@/lib/api";
+import { FaPlus, FaGithub, FaFilter, FaSearch } from "react-icons/fa";
+import Link from "next/link";
 
-type FilterType = 'all' | 'never_analyzed' | 'analyzing' | 'completed' | 'failed'
+type FilterType =
+  | "all"
+  | "never_analyzed"
+  | "analyzing"
+  | "completed"
+  | "failed";
 
 export default function ProjectsPage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [projects, setProjects] = useState<Project[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [filter, setFilter] = useState<FilterType>('all')
-  const [searchQuery, setSearchQuery] = useState('')
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<FilterType>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    if (status === 'loading') return
+    if (status === "loading") return;
     if (!session) {
-      router.push('/auth/signin')
-      return
+      router.push("/auth/signin");
+      return;
     }
 
-    loadProjects()
-  }, [session, status, router])
+    loadProjects();
+  }, [session, status, router]);
 
   const loadProjects = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       // For now, use mock data. Replace with API call when backend is ready
       // const data = await projectApi.getProjects()
-      const data = mockData.projects
-      setProjects(data)
+      const data = mockData.projects;
+      setProjects(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load projects')
+      setError(err instanceof Error ? err.message : "Failed to load projects");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleAnalyze = async (projectId: string) => {
     try {
       // Update project status to analyzing
-      setProjects(prev => 
-        prev.map(p => 
-          p.id === projectId 
-            ? { ...p, status: 'analyzing' as const }
-            : p
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id === projectId ? { ...p, status: "analyzing" as const } : p
         )
-      )
+      );
 
       // Start analysis (mock for now)
       // const analysis = await analysisApi.startAnalysis({ projectId })
-      console.log('Starting analysis for project:', projectId)
-      
+      console.log("Starting analysis for project:", projectId);
+
       // Navigate to analysis page
       // router.push(`/analysis/${analysis.id}`)
-      
+
       // For demo, simulate completion after 3 seconds
       setTimeout(() => {
-        setProjects(prev => 
-          prev.map(p => 
-            p.id === projectId 
-              ? { ...p, status: 'completed' as const }
-              : p
+        setProjects((prev) =>
+          prev.map((p) =>
+            p.id === projectId ? { ...p, status: "completed" as const } : p
           )
-        )
-      }, 3000)
-      
+        );
+      }, 3000);
     } catch (err) {
-      console.error('Failed to start analysis:', err)
+      console.error("Failed to start analysis:", err);
       // Revert status
-      setProjects(prev => 
-        prev.map(p => 
-          p.id === projectId 
-            ? { ...p, status: 'completed' as const }
-            : p
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id === projectId ? { ...p, status: "completed" as const } : p
         )
-      )
+      );
     }
-  }
+  };
 
   const handleDelete = async (projectId: string) => {
     try {
       // await projectApi.deleteProject(projectId)
-      setProjects(prev => prev.filter(p => p.id !== projectId))
+      setProjects((prev) => prev.filter((p) => p.id !== projectId));
     } catch (err) {
-      console.error('Failed to delete project:', err)
+      console.error("Failed to delete project:", err);
     }
-  }
+  };
 
-  const filteredProjects = projects.filter(project => {
-    const matchesFilter = filter === 'all' || project.status === filter
-    const matchesSearch = searchQuery === '' || 
+  const filteredProjects = projects.filter((project) => {
+    const matchesFilter = filter === "all" || project.status === filter;
+    const matchesSearch =
+      searchQuery === "" ||
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.repository.full_name.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    return matchesFilter && matchesSearch
-  })
+      project.repository.full_name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+
+    return matchesFilter && matchesSearch;
+  });
 
   const getFilterCounts = () => {
     return {
       all: projects.length,
-      never_analyzed: projects.filter(p => p.status === 'never_analyzed').length,
-      analyzing: projects.filter(p => p.status === 'analyzing').length,
-      completed: projects.filter(p => p.status === 'completed').length,
-      failed: projects.filter(p => p.status === 'failed').length,
-    }
-  }
+      never_analyzed: projects.filter((p) => p.status === "never_analyzed")
+        .length,
+      analyzing: projects.filter((p) => p.status === "analyzing").length,
+      completed: projects.filter((p) => p.status === "completed").length,
+      failed: projects.filter((p) => p.status === "failed").length,
+    };
+  };
 
-  const filterCounts = getFilterCounts()
+  const filterCounts = getFilterCounts();
 
-  if (status === 'loading' || loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
@@ -125,17 +127,17 @@ export default function ProjectsPage() {
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!session) {
-    return null
+    return null;
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -145,7 +147,7 @@ export default function ProjectsPage() {
               Manage and analyze your code repositories
             </p>
           </div>
-          
+
           <div className="flex space-x-3">
             <Link
               href="/repositories"
@@ -154,7 +156,7 @@ export default function ProjectsPage() {
               <FaGithub className="h-4 w-4" />
               <span>Import from GitHub</span>
             </Link>
-            
+
             <button className="inline-flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
               <FaPlus className="h-4 w-4" />
               <span>New Project</span>
@@ -179,19 +181,31 @@ export default function ProjectsPage() {
           {/* Filter Tabs */}
           <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
             {[
-              { key: 'all', label: 'All', count: filterCounts.all },
-              { key: 'never_analyzed', label: 'Not Analyzed', count: filterCounts.never_analyzed },
-              { key: 'analyzing', label: 'Analyzing', count: filterCounts.analyzing },
-              { key: 'completed', label: 'Completed', count: filterCounts.completed },
-              { key: 'failed', label: 'Failed', count: filterCounts.failed },
+              { key: "all", label: "All", count: filterCounts.all },
+              {
+                key: "never_analyzed",
+                label: "Not Analyzed",
+                count: filterCounts.never_analyzed,
+              },
+              {
+                key: "analyzing",
+                label: "Analyzing",
+                count: filterCounts.analyzing,
+              },
+              {
+                key: "completed",
+                label: "Completed",
+                count: filterCounts.completed,
+              },
+              { key: "failed", label: "Failed", count: filterCounts.failed },
             ].map(({ key, label, count }) => (
               <button
                 key={key}
                 onClick={() => setFilter(key as FilterType)}
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 ${
                   filter === key
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
                 }`}
               >
                 {label} {count > 0 && `(${count})`}
@@ -231,13 +245,14 @@ export default function ProjectsPage() {
             <div className="max-w-md mx-auto">
               <FaGithub className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {projects.length === 0 ? 'No projects yet' : 'No projects match your filters'}
+                {projects.length === 0
+                  ? "No projects yet"
+                  : "No projects match your filters"}
               </h3>
               <p className="text-gray-500 mb-6">
-                {projects.length === 0 
-                  ? 'Get started by importing repositories from GitHub or creating a new project.'
-                  : 'Try adjusting your search or filter criteria.'
-                }
+                {projects.length === 0
+                  ? "Get started by importing repositories from GitHub or creating a new project."
+                  : "Try adjusting your search or filter criteria."}
               </p>
               {projects.length === 0 && (
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -259,5 +274,5 @@ export default function ProjectsPage() {
         )}
       </main>
     </div>
-  )
+  );
 }

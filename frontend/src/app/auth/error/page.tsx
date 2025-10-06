@@ -2,21 +2,26 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function AuthError() {
+function AuthErrorContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
 
   const getErrorMessage = (error: string | null) => {
     switch (error) {
       case "Configuration":
-        return "There is a problem with the server configuration.";
+        return "There is a problem with the server configuration. Please contact support.";
       case "AccessDenied":
-        return "Access denied. You do not have permission to sign in.";
+        return "Access denied. You cancelled the authentication process.";
       case "Verification":
         return "The verification token has expired or has already been used.";
+      case "OAuthCallback":
+        return "OAuth callback error. Please check your GitHub app redirect URI configuration.";
+      case "OAuthSignin":
+        return "Error signing in with OAuth provider. Please try again.";
       default:
-        return "An unexpected error occurred during authentication.";
+        return "An authentication error occurred. Please try again.";
     }
   };
 
@@ -61,5 +66,26 @@ export default function AuthError() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthError() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-pink-100">
+          <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+              <h2 className="mt-6 text-3xl font-bold text-gray-900">
+                Loading...
+              </h2>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <AuthErrorContent />
+    </Suspense>
   );
 }

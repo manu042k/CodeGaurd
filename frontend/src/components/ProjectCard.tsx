@@ -1,79 +1,98 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { Project } from '@/types/project'
-import { FaGithub, FaStar, FaCodeBranch, FaLock, FaGlobe, FaCalendarAlt, FaPlay, FaEye, FaCog, FaTrash } from 'react-icons/fa'
-import { useState } from 'react'
+import Link from "next/link";
+import { Project } from "@/types/project";
+import {
+  FaGithub,
+  FaStar,
+  FaCodeBranch,
+  FaLock,
+  FaGlobe,
+  FaCalendarAlt,
+  FaPlay,
+  FaEye,
+  FaCog,
+  FaTrash,
+} from "react-icons/fa";
+import { useState } from "react";
 
 interface ProjectCardProps {
-  project: Project
-  onAnalyze?: (projectId: string) => void
-  onDelete?: (projectId: string) => void
+  project: Project;
+  onAnalyze?: (projectId: string) => void;
+  onDelete?: (projectId: string) => void;
 }
 
-export default function ProjectCard({ project, onAnalyze, onDelete }: ProjectCardProps) {
-  const [isDeleting, setIsDeleting] = useState(false)
+export default function ProjectCard({
+  project,
+  onAnalyze,
+  onDelete,
+}: ProjectCardProps) {
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const getStatusBadge = (status: Project['status']) => {
+  const getStatusBadge = (status: Project["status"]) => {
     const badges = {
-      never_analyzed: 'bg-gray-100 text-gray-800',
-      analyzing: 'bg-blue-100 text-blue-800 animate-pulse',
-      completed: 'bg-green-100 text-green-800',
-      failed: 'bg-red-100 text-red-800',
-    }
-    
+      never_analyzed: "bg-gray-100 text-gray-800",
+      analyzing: "bg-blue-100 text-blue-800 animate-pulse",
+      completed: "bg-green-100 text-green-800",
+      failed: "bg-red-100 text-red-800",
+    };
+
     const labels = {
-      never_analyzed: 'Not Analyzed',
-      analyzing: 'Analyzing...',
-      completed: 'Completed',
-      failed: 'Failed',
-    }
+      never_analyzed: "Not Analyzed",
+      analyzing: "Analyzing...",
+      completed: "Completed",
+      failed: "Failed",
+    };
 
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badges[status]}`}>
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badges[status]}`}
+      >
         {labels[status]}
       </span>
-    )
-  }
+    );
+  };
 
   const getLanguageColor = (language: string | null) => {
-    if (!language) return 'bg-gray-100 text-gray-800'
-    
+    if (!language) return "bg-gray-100 text-gray-800";
+
     const colors: { [key: string]: string } = {
-      JavaScript: 'bg-yellow-100 text-yellow-800',
-      TypeScript: 'bg-blue-100 text-blue-800',
-      Python: 'bg-green-100 text-green-800',
-      Java: 'bg-red-100 text-red-800',
-      'C++': 'bg-purple-100 text-purple-800',
-      Go: 'bg-cyan-100 text-cyan-800',
-      Rust: 'bg-orange-100 text-orange-800',
-      PHP: 'bg-indigo-100 text-indigo-800',
-    }
-    return colors[language] || 'bg-gray-100 text-gray-800'
-  }
+      JavaScript: "bg-yellow-100 text-yellow-800",
+      TypeScript: "bg-blue-100 text-blue-800",
+      Python: "bg-green-100 text-green-800",
+      Java: "bg-red-100 text-red-800",
+      "C++": "bg-purple-100 text-purple-800",
+      Go: "bg-cyan-100 text-cyan-800",
+      Rust: "bg-orange-100 text-orange-800",
+      PHP: "bg-indigo-100 text-indigo-800",
+    };
+    return colors[language] || "bg-gray-100 text-gray-800";
+  };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-  }
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   const handleDelete = async () => {
-    if (!onDelete) return
-    
-    const confirmed = window.confirm(`Are you sure you want to delete "${project.name}"? This action cannot be undone.`)
-    if (!confirmed) return
+    if (!onDelete) return;
 
-    setIsDeleting(true)
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${project.name}"? This action cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setIsDeleting(true);
     try {
-      await onDelete(project.id)
+      await onDelete(project.id);
     } catch (error) {
-      console.error('Failed to delete project:', error)
+      console.error("Failed to delete project:", error);
     }
-    setIsDeleting(false)
-  }
+    setIsDeleting(false);
+  };
 
   return (
     <div className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-200 p-6">
@@ -87,16 +106,16 @@ export default function ProjectCard({ project, onAnalyze, onDelete }: ProjectCar
               <FaGlobe className="h-4 w-4 text-green-600" />
             )}
             <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-              {project.repository.private ? 'Private' : 'Public'}
+              {project.repository.private ? "Private" : "Public"}
             </span>
             {getStatusBadge(project.status)}
           </div>
-          
+
           <h3 className="text-lg font-semibold text-gray-900 mb-1">
             {project.name}
           </h3>
-          
-          <Link 
+
+          <Link
             href={project.repository.html_url}
             target="_blank"
             rel="noopener noreferrer"
@@ -129,11 +148,15 @@ export default function ProjectCard({ project, onAnalyze, onDelete }: ProjectCar
       {/* Repository Stats */}
       <div className="flex items-center justify-between mb-4">
         {project.repository.language && (
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getLanguageColor(project.repository.language)}`}>
+          <span
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getLanguageColor(
+              project.repository.language
+            )}`}
+          >
             {project.repository.language}
           </span>
         )}
-        
+
         <div className="flex items-center space-x-4 text-sm text-gray-500">
           <div className="flex items-center space-x-1">
             <FaStar className="h-3 w-3" />
@@ -155,7 +178,10 @@ export default function ProjectCard({ project, onAnalyze, onDelete }: ProjectCar
                 Latest Analysis
               </p>
               <p className="text-xs text-gray-500">
-                {formatDate(project.latestAnalysis.completedAt || project.latestAnalysis.startedAt)}
+                {formatDate(
+                  project.latestAnalysis.completedAt ||
+                    project.latestAnalysis.startedAt
+                )}
               </p>
             </div>
             {project.latestAnalysis.overallScore && (
@@ -180,13 +206,15 @@ export default function ProjectCard({ project, onAnalyze, onDelete }: ProjectCar
       <div className="flex space-x-2">
         <button
           onClick={() => onAnalyze?.(project.id)}
-          disabled={project.status === 'analyzing'}
+          disabled={project.status === "analyzing"}
           className="flex-1 inline-flex items-center justify-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 text-sm font-medium"
         >
           <FaPlay className="h-3 w-3" />
-          <span>{project.status === 'analyzing' ? 'Analyzing...' : 'Run Analysis'}</span>
+          <span>
+            {project.status === "analyzing" ? "Analyzing..." : "Run Analysis"}
+          </span>
         </button>
-        
+
         {project.latestAnalysis && (
           <Link
             href={`/reports/${project.latestAnalysis.id}`}
@@ -196,7 +224,7 @@ export default function ProjectCard({ project, onAnalyze, onDelete }: ProjectCar
             View Report
           </Link>
         )}
-        
+
         <Link
           href={`/projects/${project.id}`}
           className="inline-flex items-center justify-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm font-medium"
@@ -205,5 +233,5 @@ export default function ProjectCard({ project, onAnalyze, onDelete }: ProjectCar
         </Link>
       </div>
     </div>
-  )
+  );
 }

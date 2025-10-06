@@ -70,13 +70,19 @@ export default function Repositories() {
       // Create project from repository
       const projectData = {
         name: repo.name,
-        description: repo.description || `Analysis project for ${repo.full_name}`,
+        description:
+          repo.description || `Analysis project for ${repo.full_name}`,
         repositoryId: repo.id,
         settings: {
           analysisConfig: {
-            enabledAgents: ['CodeQuality', 'Security', 'Architecture', 'Documentation'],
-            excludePatterns: ['node_modules', '*.test.*', 'dist', 'build'],
-            includePaths: ['src', 'lib', 'pages', 'components'],
+            enabledAgents: [
+              "CodeQuality",
+              "Security",
+              "Architecture",
+              "Documentation",
+            ],
+            excludePatterns: ["node_modules", "*.test.*", "dist", "build"],
+            includePaths: ["src", "lib", "pages", "components"],
           },
           notifications: {
             onComplete: true,
@@ -87,14 +93,13 @@ export default function Repositories() {
 
       // For now, just redirect to projects page with success message
       // Later: await projectApi.createProject(projectData)
-      console.log('Creating project:', projectData);
-      
+      console.log("Creating project:", projectData);
+
       // Redirect to projects page
-      router.push('/projects?created=' + encodeURIComponent(repo.name));
-      
+      router.push("/projects?created=" + encodeURIComponent(repo.name));
     } catch (err) {
-      console.error('Failed to create project:', err);
-      alert('Failed to create project. Please try again.');
+      console.error("Failed to create project:", err);
+      alert("Failed to create project. Please try again.");
     }
   };
 
@@ -236,7 +241,7 @@ export default function Repositories() {
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200">
-                  <button 
+                  <button
                     onClick={() => handleCreateProject(repo)}
                     className="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors duration-200 text-sm font-medium"
                   >

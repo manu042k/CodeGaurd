@@ -7,6 +7,14 @@ import { FaGithub, FaUser, FaSignOutAlt } from "react-icons/fa";
 export default function Header() {
   const { data: session, status } = useSession();
 
+  const handleSignIn = () => {
+    signIn("github", { callbackUrl: "/dashboard" });
+  };
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: "/" });
+  };
+
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -58,18 +66,18 @@ export default function Header() {
                   {session.user?.image ? (
                     <img
                       src={session.user.image}
-                      alt={session.user.name || "User"}
+                      alt={session.user?.name || "User"}
                       className="h-8 w-8 rounded-full"
                     />
                   ) : (
                     <FaUser className="h-8 w-8 text-gray-400 bg-gray-100 rounded-full p-2" />
                   )}
                   <span className="text-sm font-medium text-gray-700">
-                    {session.user?.name}
+                    {session.user?.name || session.username}
                   </span>
                 </div>
                 <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
+                  onClick={handleSignOut}
                   className="inline-flex items-center space-x-1 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   <FaSignOutAlt className="h-4 w-4" />
@@ -78,7 +86,7 @@ export default function Header() {
               </div>
             ) : (
               <button
-                onClick={() => signIn("github")}
+                onClick={handleSignIn}
                 className="inline-flex items-center space-x-2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors duration-200"
               >
                 <FaGithub className="h-4 w-4" />
