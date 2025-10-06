@@ -17,21 +17,20 @@ export function useSessionMonitor() {
       intervalRef.current = setInterval(async () => {
         const now = Date.now();
         const timeSinceLastCheck = now - lastCheckRef.current;
-        
+
         // If it's been more than 5 minutes since last check, verify session
         if (timeSinceLastCheck > 5 * 60 * 1000) {
           try {
             // Try to refresh the session
             const response = await fetch("/api/auth/session");
             const sessionData = await response.json();
-            
+
             // If no session data or expired, logout
             if (!sessionData || !sessionData.user) {
-              console.log("Session expired, logging out...");
               sessionStorage.setItem("autoLoggedOut", "true");
-              await signOut({ 
+              await signOut({
                 redirect: false,
-                callbackUrl: "/auth/signin"
+                callbackUrl: "/auth/signin",
               });
               router.push("/auth/signin");
               return;
@@ -39,15 +38,15 @@ export function useSessionMonitor() {
           } catch (error) {
             console.error("Session check failed:", error);
             // On error, assume session is invalid and logout
-            await signOut({ 
+            await signOut({
               redirect: false,
-              callbackUrl: "/auth/signin"
+              callbackUrl: "/auth/signin",
             });
             router.push("/auth/signin");
             return;
           }
         }
-        
+
         lastCheckRef.current = now;
       }, 60 * 1000); // Check every minute
     }
@@ -63,17 +62,19 @@ export function useSessionMonitor() {
   // Handle visibility change - check session when user returns to tab
   useEffect(() => {
     const handleVisibilityChange = async () => {
-      if (document.visibilityState === "visible" && status === "authenticated") {
+      if (
+        document.visibilityState === "visible" &&
+        status === "authenticated"
+      ) {
         try {
           const response = await fetch("/api/auth/session");
           const sessionData = await response.json();
-          
+
           if (!sessionData || !sessionData.user) {
-            console.log("Session expired while tab was inactive, logging out...");
             sessionStorage.setItem("autoLoggedOut", "true");
-            await signOut({ 
+            await signOut({
               redirect: false,
-              callbackUrl: "/auth/signin"
+              callbackUrl: "/auth/signin",
             });
             router.push("/auth/signin");
           }
@@ -84,7 +85,7 @@ export function useSessionMonitor() {
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    
+
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };

@@ -81,18 +81,11 @@ export class BackendAPI {
       "Content-Type": "application/json",
     };
 
-    console.log(`🔐 Session:`, session ? "Found" : "Not found");
-    console.log(
-      `🎫 Backend Token:`,
-      session?.backendToken ? "Found" : "Not found"
-    );
-
     if (session?.backendToken) {
       headers.Authorization = `Bearer ${session.backendToken}`;
     } else if (session?.accessToken) {
       // Fallback to GitHub access token if backend token not available
       headers.Authorization = `Bearer ${session.accessToken}`;
-      console.log(`🔄 Using GitHub access token as fallback`);
     }
 
     return headers;
@@ -105,9 +98,6 @@ export class BackendAPI {
     const url = `${API_BASE_URL}${endpoint}`;
     const headers = await this.getAuthHeaders();
 
-    console.log(`🔄 API Request: ${options.method || "GET"} ${url}`);
-    console.log(`🔑 Headers:`, headers);
-
     const response = await fetch(url, {
       headers: {
         ...headers,
@@ -116,24 +106,21 @@ export class BackendAPI {
       ...options,
     });
 
-    console.log(`📡 API Response: ${response.status} ${response.statusText}`);
-
     if (!response.ok) {
       // Handle 401 Unauthorized - session expired
       if (response.status === 401) {
-        console.log("🔐 Session expired (401), triggering logout...");
         // Set flag for logout notification
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           sessionStorage.setItem("autoLoggedOut", "true");
         }
         // Import signOut dynamically to avoid circular dependencies
         const { signOut } = await import("next-auth/react");
-        await signOut({ 
+        await signOut({
           redirect: false,
-          callbackUrl: "/auth/signin"
+          callbackUrl: "/auth/signin",
         });
         // Redirect to signin page
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           window.location.href = "/auth/signin";
         }
         throw new Error("Session expired. Please sign in again.");
@@ -157,7 +144,6 @@ export class BackendAPI {
     }
 
     const data = await response.json();
-    console.log(`✅ API Success:`, data);
     return data;
   }
 
@@ -185,9 +171,15 @@ export class BackendAPI {
   }
 
   async deleteProject(id: string): Promise<void> {
-    return this.apiRequest<void>(`/api/projects/${id}/`, {
-      method: "DELETE",
-    });
+    try {
+      const result = await this.apiRequest<void>(`/api/projects/${id}/`, {
+        method: "DELETE",
+      });
+      return result;
+    } catch (error) {
+      console.error("❌ BackendAPI.deleteProject failed:", error);
+      throw error;
+    }
   }
 
   // Analysis API methods
@@ -241,28 +233,20 @@ export class BackendAPI {
 
   // Test API connection and authentication
   async testConnection(): Promise<void> {
-    console.log(`🧪 Testing API connection to ${API_BASE_URL}`);
-
     try {
       // 1. Test health endpoint
       const health = await this.healthCheck();
-      console.log(`✅ Health check passed:`, health);
 
       // 2. Test authentication
       const session = await getSession();
-      console.log(`🔐 Session status:`, session ? "Found" : "Missing");
 
       if (session?.backendToken) {
-        console.log(`🎫 Backend token: Found`);
         // Try to get current user
         try {
           const user = await this.getCurrentUser();
-          console.log(`👤 Current user:`, user.username);
         } catch (error) {
           console.error(`❌ User fetch failed:`, error);
         }
-      } else {
-        console.log(`⚠️ No backend token found in session`);
       }
     } catch (error) {
       console.error(`❌ API connection test failed:`, error);

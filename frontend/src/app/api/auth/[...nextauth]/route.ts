@@ -41,8 +41,11 @@ const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, account, profile }) {
       // Check if token is expired
-      if (token.exp && typeof token.exp === 'number' && Date.now() >= token.exp * 1000) {
-        console.log("Token expired, forcing logout");
+      if (
+        token.exp &&
+        typeof token.exp === "number" &&
+        Date.now() >= token.exp * 1000
+      ) {
         return {} as any; // Return empty token to force logout
       }
 

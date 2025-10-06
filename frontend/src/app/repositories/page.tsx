@@ -4,6 +4,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
+import { useNotifications } from "@/hooks/useNotifications";
+import { Notification } from "@/components/ui/Notification";
 import {
   FaGithub,
   FaStar,
@@ -36,6 +38,9 @@ export default function Repositories() {
   const [repos, setRepos] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Modal hooks
+  const { notifications, showError, removeNotification } = useNotifications();
 
   useEffect(() => {
     if (status === "loading") return;
@@ -98,13 +103,11 @@ export default function Repositories() {
         settings: projectData.settings,
       });
 
-      console.log("Created project:", project);
-
       // Redirect to projects page
       router.push("/projects?created=" + encodeURIComponent(repo.name));
     } catch (err) {
       console.error("Failed to create project:", err);
-      alert("Failed to create project. Please try again.");
+      showError("Failed to create project. Please try again.");
     }
   };
 
@@ -270,6 +273,16 @@ export default function Repositories() {
           </div>
         )}
       </main>
+
+      {/* Notifications */}
+      {notifications.map((notification) => (
+        <Notification
+          key={notification.id}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => removeNotification(notification.id)}
+        />
+      ))}
     </div>
   );
 }

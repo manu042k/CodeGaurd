@@ -8,6 +8,8 @@ import ProjectCard from "@/components/ProjectCard";
 import { backendAPI, Project } from "@/lib/backend-api";
 import { FaPlus, FaGithub, FaFilter, FaSearch } from "react-icons/fa";
 import Link from "next/link";
+import { useNotifications } from "@/hooks/useNotifications";
+import { Notification } from "@/components/ui/Notification";
 
 type FilterType =
   | "all"
@@ -25,6 +27,10 @@ export default function ProjectsPage() {
   const [filter, setFilter] = useState<FilterType>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Notification system
+  const { notifications, showSuccess, showError, removeNotification } =
+    useNotifications();
+
   useEffect(() => {
     if (status === "loading") return;
     if (!session) {
@@ -37,15 +43,20 @@ export default function ProjectsPage() {
 
   const loadProjects = async () => {
     try {
-      console.log("🔄 Loading projects...");
       setLoading(true);
       const data = await backendAPI.getProjects();
-      console.log("✅ Projects loaded:", data);
       setProjects(data);
     } catch (err) {
       console.error("❌ Failed to load projects:", err);
-      setError(err instanceof Error ? err.message : "Failed to load projects");
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to load projects";
+      setError(errorMessage);
       setProjects([]); // Empty array when API fails
+
+      // Show error notification
+      showError(
+        "Failed to load projects. Please check your connection and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -62,27 +73,57 @@ export default function ProjectsPage() {
 
       // Start analysis
       const analysis = await backendAPI.startAnalysis({ projectId });
-      console.log("Started analysis:", analysis.id);
 
-      // Navigate to analysis page
-      router.push(`/analysis/${analysis.id}`);
+      // Show success notification
+      showSuccess("Your project analysis has been started successfully.");
+
+      // Navigate to analysis page after a short delay
+      setTimeout(() => {
+        router.push(`/analysis/${analysis.id}`);
+      }, 1000);
     } catch (err) {
       console.error("Failed to start analysis:", err);
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to start analysis";
+
       // Revert status
       setProjects((prev) =>
         prev.map((p) =>
           p.id === projectId ? { ...p, status: "never_analyzed" as const } : p
         )
       );
+
+      // Show error notification
+      showError("Failed to start the analysis. Please try again.");
     }
   };
 
   const handleDelete = async (projectId: string) => {
+    const project = projects.find((p) => p.id === projectId);
+    const projectName = project?.name || "Unknown Project";
+
     try {
       await backendAPI.deleteProject(projectId);
+
       setProjects((prev) => prev.filter((p) => p.id !== projectId));
+
+      // Show success notification
+      showSuccess(`"${projectName}" has been successfully deleted.`);
     } catch (err) {
-      console.error("Failed to delete project:", err);
+      console.error("❌ Failed to delete project in ProjectsPage:", err);
+      console.error("❌ Error details:", {
+        name: err instanceof Error ? err.name : "Unknown",
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+        projectId,
+        projectName,
+      });
+
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to delete project";
+
+      // Show error notification
+      showError(`Failed to delete "${projectName}". Please try again.`);
     }
   };
 
@@ -143,16 +184,11 @@ export default function ProjectsPage() {
           <div className="flex space-x-3">
             <Link
               href="/repositories"
-              className="inline-flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+              className="inline-flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
             >
               <FaGithub className="h-4 w-4" />
               <span>Import from GitHub</span>
             </Link>
-
-            <button className="inline-flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
-              <FaPlus className="h-4 w-4" />
-              <span>New Project</span>
-            </button>
           </div>
         </div>
 
@@ -206,19 +242,6 @@ export default function ProjectsPage() {
           </div>
         </div>
 
-        {/* Error State */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-800">{error}</p>
-            <button
-              onClick={loadProjects}
-              className="mt-2 text-red-600 hover:text-red-800 font-medium"
-            >
-              Try again
-            </button>
-          </div>
-        )}
-
         {/* Projects Grid */}
         {filteredProjects.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -247,7 +270,7 @@ export default function ProjectsPage() {
                   : "Try adjusting your search or filter criteria."}
               </p>
               {projects.length === 0 && (
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <div className="flex justify-center">
                   <Link
                     href="/repositories"
                     className="inline-flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
@@ -255,16 +278,22 @@ export default function ProjectsPage() {
                     <FaGithub className="h-4 w-4" />
                     <span>Import from GitHub</span>
                   </Link>
-                  <button className="inline-flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-                    <FaPlus className="h-4 w-4" />
-                    <span>Create New Project</span>
-                  </button>
                 </div>
               )}
             </div>
           </div>
         )}
       </main>
+
+      {/* Notifications */}
+      {notifications.map((notification) => (
+        <Notification
+          key={notification.id}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => removeNotification(notification.id)}
+        />
+      ))}
     </div>
   );
 }

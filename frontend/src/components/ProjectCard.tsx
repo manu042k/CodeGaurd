@@ -15,6 +15,10 @@ import {
   FaTrash,
 } from "react-icons/fa";
 import { useState } from "react";
+import { useSimpleModal } from "@/hooks/useSimpleModal";
+import { useNotifications } from "@/hooks/useNotifications";
+import { SimpleModal } from "@/components/ui/SimpleModal";
+import { Notification } from "@/components/ui/Notification";
 
 interface ProjectCardProps {
   project: Project;
@@ -28,6 +32,12 @@ export default function ProjectCard({
   onDelete,
 }: ProjectCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // Clean modal and notification system
+  const deleteModal = useSimpleModal();
+  const { notifications, showSuccess, showError, removeNotification } =
+    useNotifications();
 
   const getStatusBadge = (status: Project["status"]) => {
     const badges = {
@@ -75,149 +85,220 @@ export default function ProjectCard({
       month: "short",
       day: "numeric",
     });
+  }; // Delete handler using custom modal
+  const handleDeleteClick = () => {
+    deleteModal.openModal({
+      title: "Delete Project",
+      message: `Are you sure you want to delete "${project.name}"? This action cannot be undone.`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "danger",
+      onConfirm: handleDelete,
+    });
   };
 
   const handleDelete = async () => {
-    if (!onDelete) return;
-
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${project.name}"? This action cannot be undone.`
-    );
-    if (!confirmed) return;
-
-    setIsDeleting(true);
-    try {
-      await onDelete(project.id);
-    } catch (error) {
-      console.error("Failed to delete project:", error);
+    if (!onDelete) {
+      console.warn("⚠️ No onDelete prop provided to ProjectCard");
+      showError("Delete function not available");
+      return;
     }
-    setIsDeleting(false);
+
+    try {
+      setIsDeleting(true);
+      await onDelete(project.id);
+
+      showSuccess(`Project "${project.name}" deleted successfully!`);
+    } catch (error) {
+      console.error("❌ Failed to delete project in ProjectCard:", error);
+      console.error("❌ Error details:", {
+        name: error instanceof Error ? error.name : "Unknown",
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+
+      showError(
+        `Failed to delete project: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+      throw error; // Re-throw to prevent modal from closing
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleAnalyzeClick = async () => {
+    if (!onAnalyze) return;
+
+    try {
+      setIsAnalyzing(true);
+      await onAnalyze(project.id);
+
+      showSuccess(`Analysis started for "${project.name}"!`);
+    } catch (error) {
+      console.error("Failed to start analysis:", error);
+      showError(
+        `Failed to start analysis: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-200 p-6">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <div className="flex items-center space-x-2 mb-2">
-            <FaGithub className="h-4 w-4 text-gray-600" />
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-              Repository
-            </span>
-            {getStatusBadge(project.status)}
-          </div>
-
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">
-            {project.name}
-          </h3>
-
-          <Link
-            href={project.github_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-gray-600 hover:text-gray-900 flex items-center space-x-1"
-          >
-            <FaGithub className="h-4 w-4" />
-            <span>{project.github_full_name}</span>
-          </Link>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="p-2 text-gray-400 hover:text-red-600 transition-colors duration-200"
-            title="Delete project"
-          >
-            <FaTrash className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Description */}
-      {project.description && (
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-          {project.description}
-        </p>
-      )}
-
-      {/* Project Stats */}
-      <div className="flex items-center justify-between mb-4">
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-          Project
-        </span>
-
-        <div className="flex items-center space-x-4 text-sm text-gray-500">
-          <div className="flex items-center space-x-1">
-            <FaGithub className="h-3 w-3" />
-            <span>GitHub</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Analysis Info */}
-      {project.latest_analysis && (
-        <div className="bg-gray-50 rounded-lg p-3 mb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-900">
-                Latest Analysis
-              </p>
-              <p className="text-xs text-gray-500">
-                {formatDate(
-                  project.latest_analysis.completedAt ||
-                    project.latest_analysis.startedAt
-                )}
-              </p>
+    <>
+      <div className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-200 p-6">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <div className="flex items-center space-x-2 mb-2">
+              <FaGithub className="h-4 w-4 text-gray-600" />
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                Repository
+              </span>
+              {getStatusBadge(project.status)}
             </div>
-            {project.latest_analysis.overallScore && (
-              <div className="text-right">
-                <p className="text-lg font-bold text-gray-900">
-                  {project.latest_analysis.overallScore}/100
-                </p>
-                <p className="text-xs text-gray-500">Score</p>
-              </div>
-            )}
+
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+              {project.name}
+            </h3>
+
+            <Link
+              href={project.github_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-gray-600 hover:text-gray-900 flex items-center space-x-1"
+            >
+              <FaGithub className="h-4 w-4" />
+              <span>{project.github_full_name}</span>
+            </Link>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleDeleteClick}
+              disabled={isDeleting}
+              className="p-2 text-gray-400 hover:text-red-600 transition-colors duration-200"
+              title="Delete project"
+            >
+              <FaTrash className="h-4 w-4" />
+            </button>
           </div>
         </div>
-      )}
 
-      {/* Last Updated */}
-      <div className="flex items-center text-xs text-gray-500 mb-4">
-        <FaCalendarAlt className="h-3 w-3 mr-1" />
-        Project created {formatDate(project.created_at)}
-      </div>
-
-      {/* Actions */}
-      <div className="flex space-x-2">
-        <button
-          onClick={() => onAnalyze?.(project.id)}
-          disabled={project.status === "analyzing"}
-          className="flex-1 inline-flex items-center justify-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 text-sm font-medium"
-        >
-          <FaPlay className="h-3 w-3" />
-          <span>
-            {project.status === "analyzing" ? "Analyzing..." : "Run Analysis"}
-          </span>
-        </button>
-
-        {project.latest_analysis && (
-          <Link
-            href={`/reports/${project.latest_analysis.id}`}
-            className="inline-flex items-center justify-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm font-medium"
-          >
-            <FaEye className="h-3 w-3 mr-2" />
-            View Report
-          </Link>
+        {/* Description */}
+        {project.description && (
+          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+            {project.description}
+          </p>
         )}
 
-        <Link
-          href={`/projects/${project.id}`}
-          className="inline-flex items-center justify-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm font-medium"
-        >
-          <FaCog className="h-3 w-3" />
-        </Link>
+        {/* Project Stats */}
+        <div className="flex items-center justify-between mb-4">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            Project
+          </span>
+
+          <div className="flex items-center space-x-4 text-sm text-gray-500">
+            <div className="flex items-center space-x-1">
+              <FaGithub className="h-3 w-3" />
+              <span>GitHub</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Analysis Info */}
+        {project.latest_analysis && (
+          <div className="bg-gray-50 rounded-lg p-3 mb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-900">
+                  Latest Analysis
+                </p>
+                <p className="text-xs text-gray-500">
+                  {formatDate(
+                    project.latest_analysis.completedAt ||
+                      project.latest_analysis.startedAt
+                  )}
+                </p>
+              </div>
+              {project.latest_analysis.overallScore && (
+                <div className="text-right">
+                  <p className="text-lg font-bold text-gray-900">
+                    {project.latest_analysis.overallScore}/100
+                  </p>
+                  <p className="text-xs text-gray-500">Score</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Last Updated */}
+        <div className="flex items-center text-xs text-gray-500 mb-4">
+          <FaCalendarAlt className="h-3 w-3 mr-1" />
+          Project created {formatDate(project.created_at)}
+        </div>
+
+        {/* Actions */}
+        <div className="flex space-x-2">
+          <button
+            onClick={handleAnalyzeClick}
+            disabled={project.status === "analyzing" || isAnalyzing}
+            className="flex-1 inline-flex items-center justify-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 text-sm font-medium"
+          >
+            <FaPlay className="h-3 w-3" />
+            <span>
+              {project.status === "analyzing" || isAnalyzing
+                ? "Analyzing..."
+                : "Run Analysis"}
+            </span>
+          </button>
+
+          {project.latest_analysis && (
+            <Link
+              href={`/reports/${project.latest_analysis.id}`}
+              className="inline-flex items-center justify-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm font-medium"
+            >
+              <FaEye className="h-3 w-3 mr-2" />
+              View Report
+            </Link>
+          )}
+
+          <Link
+            href={`/projects/${project.id}`}
+            className="inline-flex items-center justify-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm font-medium"
+          >
+            <FaCog className="h-3 w-3" />
+          </Link>
+        </div>
       </div>
-    </div>
+
+      {/* Custom Modal */}
+      <SimpleModal
+        isOpen={deleteModal.isOpen}
+        onClose={deleteModal.closeModal}
+        onConfirm={deleteModal.handleConfirm}
+        title={deleteModal.config?.title || ""}
+        message={deleteModal.config?.message || ""}
+        confirmText={deleteModal.config?.confirmText}
+        cancelText={deleteModal.config?.cancelText}
+        type={deleteModal.config?.type}
+        isLoading={deleteModal.isLoading || isDeleting}
+      />
+
+      {/* Notifications */}
+      {notifications.map((notification) => (
+        <Notification
+          key={notification.id}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => removeNotification(notification.id)}
+        />
+      ))}
+    </>
   );
 }

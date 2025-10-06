@@ -39,54 +39,38 @@ export default function Dashboard() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (loading) {
-        console.log("⏰ Loading timeout reached, forcing dashboard to show");
         setLoading(false);
-        setError("Dashboard took too long to load. Please refresh the page.");
+        // Don't set error, just show what we have
       }
-    }, 15000); // 15 second timeout
+    }, 30000); // 30 second timeout (increased)
 
     return () => clearTimeout(timeout);
   }, [loading]);
 
   useEffect(() => {
-    console.log("🔍 Auth status:", { status, hasSession: !!session });
-    
     if (status === "loading") return; // Still loading
-    
+
     if (!session) {
-      console.log("❌ No session found, redirecting to signin");
       router.push("/auth/signin");
       return;
     }
-    
-    console.log("✅ Session found, loading dashboard data");
+
     loadDashboardData();
   }, [session, status, router]);
 
   const loadDashboardData = async () => {
-    console.log("🚀 Starting loadDashboardData...");
-    
     try {
       setLoading(true);
       setError(null);
 
-      console.log("🔄 Loading dashboard data...");
-      console.log("🔐 Session details:", {
-        hasSession: !!session,
-        hasBackendToken: !!session?.backendToken,
-        hasAccessToken: !!session?.accessToken,
-        username: session?.username
-      });
-
       // Add timeout to prevent infinite loading
-      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Dashboard load timeout")), 10000)
       );
 
       // Test backend connection first
       try {
         const health = await backendAPI.healthCheck();
-        console.log("✅ Backend health:", health);
       } catch (err) {
         console.error("❌ Backend health check failed:", err);
       }
@@ -94,7 +78,6 @@ export default function Dashboard() {
       // Test current user endpoint
       try {
         const currentUser = await backendAPI.getCurrentUser();
-        console.log("👤 Current user:", currentUser.username);
       } catch (err) {
         console.error("❌ Failed to get current user:", err);
       }
@@ -104,8 +87,6 @@ export default function Dashboard() {
         console.error("❌ Failed to load projects:", err);
         return [];
       });
-
-      console.log("📊 Loaded projects:", projectsData.length);
 
       // For now, we'll calculate stats from projects
       // TODO: Add actual analysis data when analysis endpoints are ready
@@ -118,34 +99,26 @@ export default function Dashboard() {
       const stats = {
         totalProjects: projectsData.length,
         totalAnalyses: analysesData.length,
-        pendingAnalyses: projectsData.filter(p => p.status === "analyzing").length,
-        completedAnalyses: projectsData.filter(p => p.status === "completed").length,
+        pendingAnalyses: projectsData.filter((p) => p.status === "analyzing")
+          .length,
+        completedAnalyses: projectsData.filter((p) => p.status === "completed")
+          .length,
       };
 
       setStats(stats);
-      console.log("📈 Dashboard stats:", stats);
-      console.log("✅ Dashboard loaded successfully");
-
     } catch (err) {
       console.error("❌ Dashboard load failed:", err);
       setError(
-        `Failed to load dashboard: ${err instanceof Error ? err.message : 'Unknown error'}`
+        `Failed to load dashboard: ${
+          err instanceof Error ? err.message : "Unknown error"
+        }`
       );
     } finally {
-      console.log("🏁 Setting loading to false");
       setLoading(false);
     }
   };
 
-  console.log("🔄 Render check:", { 
-    status, 
-    loading, 
-    hasSession: !!session, 
-    shouldShowSpinner: status === "loading" || loading 
-  });
-
   if (status === "loading") {
-    console.log("🔄 Showing spinner: NextAuth loading");
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -157,13 +130,14 @@ export default function Dashboard() {
   }
 
   if (loading) {
-    console.log("🔄 Showing spinner: Dashboard loading");
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading dashboard data...</p>
-          <p className="text-sm text-gray-500 mt-2">If this takes too long, check the console for errors</p>
+          <p className="text-sm text-gray-500 mt-2">
+            If this takes too long, check the console for errors
+          </p>
         </div>
       </div>
     );
@@ -186,15 +160,6 @@ export default function Dashboard() {
           <p className="text-gray-600 mt-2">
             Here's an overview of your code security status.
           </p>
-          {session.backendToken ? (
-            <p className="text-sm text-green-600 mt-1">
-              ✅ Connected to backend API
-            </p>
-          ) : (
-            <p className="text-sm text-yellow-600 mt-1">
-              ⚠️ Backend API connection pending...
-            </p>
-          )}
         </div>
 
         {/* Error Message */}
@@ -323,8 +288,12 @@ export default function Dashboard() {
                     </div>
                     <span
                       className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                        project.status === "active"
+                        project.status === "completed"
                           ? "bg-green-100 text-green-800"
+                          : project.status === "analyzing"
+                          ? "bg-blue-100 text-blue-800"
+                          : project.status === "failed"
+                          ? "bg-red-100 text-red-800"
                           : "bg-gray-100 text-gray-800"
                       }`}
                     >
