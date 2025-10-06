@@ -32,7 +32,8 @@ export interface Analysis {
 }
 
 // API Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -134,7 +135,9 @@ class BackendApi {
 
   // Analysis methods
   async getAnalyses(projectId?: string): Promise<Analysis[]> {
-    const endpoint = projectId ? `/analyses?project_id=${projectId}` : "/analyses";
+    const endpoint = projectId
+      ? `/analyses?project_id=${projectId}`
+      : "/analyses";
     return this.request<Analysis[]>(endpoint);
   }
 

@@ -12,7 +12,7 @@ declare module "next-auth" {
       id?: string;
     } & DefaultSession["user"];
   }
-  
+
   interface JWT {
     accessToken?: string;
     username?: string;
@@ -47,31 +47,36 @@ const authOptions: NextAuthOptions = {
         token.email = (profile as any)?.email;
         token.name = (profile as any)?.name;
         token.avatar_url = (profile as any)?.avatar_url;
-        
+
         // Sync user with backend API
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/sync-user`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              github_id: token.githubId,
-              username: token.username,
-              email: token.email,
-              full_name: token.name,
-              avatar_url: token.avatar_url,
-              github_token: token.accessToken,
-            }),
-          });
-          
+          const response = await fetch(
+            `${
+              process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+            }/api/auth/sync-user`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                github_id: token.githubId,
+                username: token.username,
+                email: token.email,
+                full_name: token.name,
+                avatar_url: token.avatar_url,
+                github_token: token.accessToken,
+              }),
+            }
+          );
+
           if (response.ok) {
             const backendUser = await response.json();
             token.backendUserId = backendUser.id;
             token.backendToken = backendUser.jwt_token;
           }
         } catch (error) {
-          console.error('Failed to sync user with backend:', error);
+          console.error("Failed to sync user with backend:", error);
         }
       }
       return token;

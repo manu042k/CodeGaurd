@@ -22,9 +22,9 @@ function SignInContent() {
   const handleSignIn = async (providerId: string) => {
     setLoading(true);
     try {
-      await signIn(providerId, { 
+      await signIn(providerId, {
         callbackUrl: "/dashboard",
-        redirect: true 
+        redirect: true,
       });
     } catch (error) {
       console.error("Sign in error:", error);
@@ -47,7 +47,7 @@ function SignInContent() {
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
             <p className="text-red-800 text-sm">
-              {error === "OAuthCallback" 
+              {error === "OAuthCallback"
                 ? "OAuth configuration error. Please check your GitHub app settings."
                 : `Authentication error: ${error}`}
             </p>
@@ -82,14 +82,16 @@ function SignInContent() {
 
 export default function SignIn() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+            <p className="mt-2 text-gray-600">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <SignInContent />
     </Suspense>
   );

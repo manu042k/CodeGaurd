@@ -5,21 +5,25 @@
 The OAuth configuration has been completely rewritten to use NextAuth.js properly and handle authentication entirely in the frontend. Here's what was changed:
 
 ### 1. Removed Duplicate Configuration
+
 - Deleted the old `/pages/api/auth/[...nextauth].js` file
 - Kept only the App Router version at `/src/app/api/auth/[...nextauth]/route.ts`
 
 ### 2. Updated NextAuth Configuration
+
 - Fixed TypeScript type declarations for session and JWT
 - Added proper error handling and debugging
 - Configured callback URLs correctly
 - Added session strategy as JWT
 
 ### 3. Updated Components
+
 - **Header**: Now uses `useSession` from NextAuth instead of custom API
 - **Auth Pages**: Enhanced error handling and user feedback
 - **Middleware**: Added route protection for authenticated pages
 
 ### 4. Fixed OAuth Flow
+
 - Proper redirect URI configuration
 - Enhanced error handling for OAuth callback issues
 - Better user experience with loading states
@@ -27,18 +31,21 @@ The OAuth configuration has been completely rewritten to use NextAuth.js properl
 ## 🚀 Quick Setup
 
 1. **Run the setup script:**
+
    ```bash
    cd frontend
    ./setup-oauth.sh
    ```
 
 2. **Configure GitHub OAuth App:**
+
    - Go to [GitHub Developer Settings](https://github.com/settings/developers)
    - Create new OAuth App with:
      - **Homepage URL**: `http://localhost:3000`
      - **Callback URL**: `http://localhost:3000/api/auth/callback/github`
 
 3. **Add your credentials to `.env.local`:**
+
    ```env
    NEXTAUTH_URL=http://localhost:3000
    NEXTAUTH_SECRET=your-generated-secret
@@ -70,11 +77,13 @@ frontend/
 ## 🔗 OAuth URLs
 
 ### Development URLs
+
 - **Sign In**: `http://localhost:3000/auth/signin`
 - **Callback**: `http://localhost:3000/api/auth/callback/github`
 - **Error**: `http://localhost:3000/auth/error`
 
 ### Production URLs (replace with your domain)
+
 - **Sign In**: `https://yourdomain.com/auth/signin`
 - **Callback**: `https://yourdomain.com/api/auth/callback/github`
 - **Error**: `https://yourdomain.com/auth/error`
@@ -82,6 +91,7 @@ frontend/
 ## 🛡️ Protected Routes
 
 The following routes are automatically protected by middleware:
+
 - `/dashboard/*`
 - `/projects/*`
 - `/repositories/*`
@@ -92,13 +102,16 @@ Unauthenticated users will be redirected to `/auth/signin`.
 ## 🔍 Troubleshooting
 
 ### "redirect_uri_mismatch" Error
+
 ✅ **Fixed**: The callback URL is now properly configured as `/api/auth/callback/github`
 
 Make sure your GitHub OAuth app has the exact callback URL:
+
 - Development: `http://localhost:3000/api/auth/callback/github`
 - Production: `https://yourdomain.com/api/auth/callback/github`
 
 ### "OAuth callback was not verified" Error
+
 ✅ **Fixed**: Enhanced error handling and proper secret generation
 
 1. Make sure `NEXTAUTH_SECRET` is set and generated properly
@@ -106,9 +119,11 @@ Make sure your GitHub OAuth app has the exact callback URL:
 3. Check that your GitHub app credentials are correct
 
 ### Authentication Flow Issues
+
 ✅ **Fixed**: Complete frontend-only authentication
 
 The authentication now works entirely in the frontend using NextAuth.js:
+
 1. User clicks "Sign in with GitHub"
 2. Redirected to GitHub OAuth
 3. GitHub redirects back to `/api/auth/callback/github`
@@ -128,6 +143,7 @@ The authentication now works entirely in the frontend using NextAuth.js:
 ## 📖 Next Steps
 
 After OAuth is working:
+
 1. Test the sign-in flow
 2. Verify protected routes redirect properly
 3. Customize the dashboard with your project data

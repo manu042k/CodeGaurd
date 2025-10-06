@@ -16,6 +16,6 @@ export const config = {
     "/dashboard/:path*",
     "/projects/:path*",
     "/repositories/:path*",
-    "/api/protected/:path*"
+    "/api/protected/:path*",
   ],
 };

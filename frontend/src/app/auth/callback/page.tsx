@@ -16,7 +16,7 @@ function AuthCallbackContent() {
     const handleCallback = async () => {
       try {
         const error = searchParams.get("error");
-        
+
         if (error) {
           setIsError(true);
           setMessage("Authentication failed. Redirecting...");
