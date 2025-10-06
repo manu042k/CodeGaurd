@@ -142,10 +142,23 @@ class AnalysisService:
                 temp_dir = tempfile.mkdtemp(prefix="codeguard_analysis_")
                 
                 github_service = GitHubService(github_token)
-                clone_success = github_service.clone_repository(repository, temp_dir)
                 
-                if not clone_success:
-                    raise Exception("Failed to clone repository")
+                # Clone with shallow clone for faster analysis (only latest commit needed)
+                clone_result = github_service.clone_repository(
+                    repository, 
+                    temp_dir,
+                    shallow=True,  # Faster for analysis
+                    depth=1,
+                    timeout=600  # 10 minutes max
+                )
+                
+                if not clone_result.success:
+                    raise Exception(f"Failed to clone repository: {clone_result.error}")
+                
+                logger.info(
+                    f"Repository cloned successfully: {clone_result.size_mb:.2f} MB, "
+                    f"{clone_result.duration_seconds:.2f}s"
+                )
                 
                 # Run each agent
                 for agent_result in analysis.agent_results:
