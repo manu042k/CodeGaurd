@@ -93,7 +93,9 @@ class ProjectBase(BaseModel):
     settings: Optional[ProjectSettings] = None
 
 class ProjectCreate(ProjectBase):
-    repository_id: int
+    github_repo_id: int
+    github_url: str
+    github_full_name: str
 
 class ProjectUpdate(BaseModel):
     name: Optional[str] = None
@@ -103,12 +105,13 @@ class ProjectUpdate(BaseModel):
 class Project(ProjectBase):
     id: str
     user_id: str
-    repository_id: int
+    github_repo_id: int
+    github_url: str
+    github_full_name: str
     status: ProjectStatus
     analysis_count: int
     created_at: datetime
     updated_at: Optional[datetime] = None
-    repository: Repository
     
     class Config:
         from_attributes = True

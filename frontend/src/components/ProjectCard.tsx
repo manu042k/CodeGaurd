@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Project } from "@/types/project";
+import { Project } from "@/lib/backend-api";
 import {
   FaGithub,
   FaStar,
@@ -100,13 +100,9 @@ export default function ProjectCard({
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-center space-x-2 mb-2">
-            {project.repository.private ? (
-              <FaLock className="h-4 w-4 text-yellow-600" />
-            ) : (
-              <FaGlobe className="h-4 w-4 text-green-600" />
-            )}
+            <FaGithub className="h-4 w-4 text-gray-600" />
             <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-              {project.repository.private ? "Private" : "Public"}
+              Repository
             </span>
             {getStatusBadge(project.status)}
           </div>
@@ -116,13 +112,13 @@ export default function ProjectCard({
           </h3>
 
           <Link
-            href={project.repository.html_url}
+            href={project.github_url}
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-gray-600 hover:text-gray-900 flex items-center space-x-1"
           >
             <FaGithub className="h-4 w-4" />
-            <span>{project.repository.full_name}</span>
+            <span>{project.github_full_name}</span>
           </Link>
         </div>
 
@@ -145,32 +141,22 @@ export default function ProjectCard({
         </p>
       )}
 
-      {/* Repository Stats */}
+      {/* Project Stats */}
       <div className="flex items-center justify-between mb-4">
-        {project.repository.language && (
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getLanguageColor(
-              project.repository.language
-            )}`}
-          >
-            {project.repository.language}
-          </span>
-        )}
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          Project
+        </span>
 
         <div className="flex items-center space-x-4 text-sm text-gray-500">
           <div className="flex items-center space-x-1">
-            <FaStar className="h-3 w-3" />
-            <span>{project.repository.stargazers_count}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <FaCodeBranch className="h-3 w-3" />
-            <span>{project.repository.forks_count}</span>
+            <FaGithub className="h-3 w-3" />
+            <span>GitHub</span>
           </div>
         </div>
       </div>
 
       {/* Analysis Info */}
-      {project.latestAnalysis && (
+      {project.latest_analysis && (
         <div className="bg-gray-50 rounded-lg p-3 mb-4">
           <div className="flex items-center justify-between">
             <div>
@@ -179,15 +165,15 @@ export default function ProjectCard({
               </p>
               <p className="text-xs text-gray-500">
                 {formatDate(
-                  project.latestAnalysis.completedAt ||
-                    project.latestAnalysis.startedAt
+                  project.latest_analysis.completedAt ||
+                    project.latest_analysis.startedAt
                 )}
               </p>
             </div>
-            {project.latestAnalysis.overallScore && (
+            {project.latest_analysis.overallScore && (
               <div className="text-right">
                 <p className="text-lg font-bold text-gray-900">
-                  {project.latestAnalysis.overallScore}/100
+                  {project.latest_analysis.overallScore}/100
                 </p>
                 <p className="text-xs text-gray-500">Score</p>
               </div>
@@ -199,7 +185,7 @@ export default function ProjectCard({
       {/* Last Updated */}
       <div className="flex items-center text-xs text-gray-500 mb-4">
         <FaCalendarAlt className="h-3 w-3 mr-1" />
-        Repository updated {formatDate(project.repository.updated_at)}
+        Project created {formatDate(project.created_at)}
       </div>
 
       {/* Actions */}
@@ -215,9 +201,9 @@ export default function ProjectCard({
           </span>
         </button>
 
-        {project.latestAnalysis && (
+        {project.latest_analysis && (
           <Link
-            href={`/reports/${project.latestAnalysis.id}`}
+            href={`/reports/${project.latest_analysis.id}`}
             className="inline-flex items-center justify-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm font-medium"
           >
             <FaEye className="h-3 w-3 mr-2" />

@@ -33,12 +33,19 @@ const authOptions: NextAuthOptions = {
       authorization: {
         params: {
           scope: "read:user user:email repo",
+          prompt: "select_account", // Forces account selection
         },
       },
     }),
   ],
   callbacks: {
     async jwt({ token, account, profile }) {
+      // Check if token is expired
+      if (token.exp && typeof token.exp === 'number' && Date.now() >= token.exp * 1000) {
+        console.log("Token expired, forcing logout");
+        return {} as any; // Return empty token to force logout
+      }
+
       // Persist the OAuth access_token and or the user id to the token right after signin
       if (account) {
         token.accessToken = account.access_token;
@@ -99,6 +106,11 @@ const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 hours
+    updateAge: 60 * 60, // 1 hour - refresh session if user is active
+  },
+  jwt: {
+    maxAge: 24 * 60 * 60, // 24 hours
   },
   debug: process.env.NODE_ENV === "development",
 };

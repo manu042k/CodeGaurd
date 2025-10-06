@@ -50,13 +50,9 @@ export default function Repositories() {
   const fetchRepositories = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/github/repos");
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch repositories");
-      }
-
-      const data = await response.json();
+      // Import backend API dynamically to avoid SSR issues
+      const { backendAPI } = await import("@/lib/backend-api");
+      const data = await backendAPI.getRepositories();
       setRepos(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -91,9 +87,18 @@ export default function Repositories() {
         },
       };
 
-      // For now, just redirect to projects page with success message
-      // Later: await projectApi.createProject(projectData)
-      console.log("Creating project:", projectData);
+      // Create project using backend API
+      const { backendAPI } = await import("@/lib/backend-api");
+      const project = await backendAPI.createProject({
+        name: projectData.name,
+        description: projectData.description,
+        github_repo_id: repo.id,
+        github_url: repo.html_url,
+        github_full_name: repo.full_name,
+        settings: projectData.settings,
+      });
+
+      console.log("Created project:", project);
 
       // Redirect to projects page
       router.push("/projects?created=" + encodeURIComponent(repo.name));

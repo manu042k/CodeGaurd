@@ -54,26 +54,29 @@ class ProjectService:
     
     def create_project(self, project_data: ProjectCreate, user_id: str) -> Project:
         """Create a new project"""
-        # First, ensure the repository exists
-        repository = self.db.query(Repository).filter(Repository.id == project_data.repository_id).first()
-        if not repository:
-            raise ValueError("Repository not found")
-        
-        # Create the project
-        db_project = Project(
-            id=str(uuid.uuid4()),
-            name=project_data.name,
-            description=project_data.description,
-            user_id=user_id,
-            repository_id=project_data.repository_id,
-            settings=project_data.settings.dict() if project_data.settings else None
-        )
-        
-        self.db.add(db_project)
-        self.db.commit()
-        self.db.refresh(db_project)
-        
-        return db_project
+        try:
+            # Create the project directly with GitHub repository info
+            db_project = Project(
+                id=str(uuid.uuid4()),
+                name=project_data.name,
+                description=project_data.description,
+                user_id=user_id,
+                github_repo_id=project_data.github_repo_id,
+                github_url=project_data.github_url,
+                github_full_name=project_data.github_full_name,
+                settings=project_data.settings.dict() if project_data.settings else None
+            )
+            
+            self.db.add(db_project)
+            self.db.commit()
+            self.db.refresh(db_project)
+            
+            return db_project
+            
+        except Exception as e:
+            print(f"ProjectService.create_project error: {str(e)}")
+            self.db.rollback()
+            raise
     
     def update_project(self, project_id: str, project_data: ProjectUpdate, user_id: str) -> Optional[Project]:
         """Update an existing project"""

@@ -106,19 +106,41 @@ class GitHubService:
     def validate_repository_access(self, repo_id: int, user_id: str) -> bool:
         """Validate that user has access to the repository"""
         try:
-            user = self.db.query(User).filter(User.id == user_id).first()
-            if not user or not user.github_token:
+            # First check if repository exists in our database
+            if self.db:
+                repository = self.db.query(Repository).filter(Repository.id == repo_id).first()
+                if repository:
+                    # Use the full_name to validate access
+                    github = Github(self.access_token)
+                    repo = github.get_repo(repository.full_name)
+                    _ = repo.name  # This will raise an exception if no access
+                    return True
+            
+            # Fallback: try to get repo by ID directly (less reliable)
+            try:
+                github_user = self.github.get_user()
+                repos = github_user.get_repos()
+                for repo in repos:
+                    if repo.id == repo_id:
+                        return True
+                return False
+            except:
                 return False
             
-            github = Github(user.github_token)
-            repo = github.get_repo(repo_id)
+        except Exception as e:
+            logger.error(f"Repository access validation failed for repo {repo_id}: {str(e)}")
+            return False
             
+    def validate_repository_access_by_name(self, full_name: str) -> bool:
+        """Validate repository access using full name (e.g., 'user/repo')"""
+        try:
+            github = Github(self.access_token)
+            repo = github.get_repo(full_name)
             # Try to access the repository - will raise exception if no access
             _ = repo.name
             return True
-            
         except Exception as e:
-            logger.error(f"Repository access validation failed: {str(e)}")
+            logger.error(f"Repository access validation failed for {full_name}: {str(e)}")
             return False
     
     def get_user(self) -> Optional[dict]:

@@ -49,13 +49,21 @@ function removeAuthToken(): void {
   localStorage.removeItem("auth_token");
 }
 
-// Enhanced apiRequest with auth support
+// Enhanced apiRequest with NextAuth session support
 async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  const token = getAuthToken();
+
+  // Try to get NextAuth session first, fallback to localStorage token
+  let token = null;
+  if (typeof window !== "undefined") {
+    // Import dynamically to avoid SSR issues
+    const { getSession } = await import("next-auth/react");
+    const session = await getSession();
+    token = session?.backendToken || getAuthToken();
+  }
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -75,7 +83,6 @@ async function apiRequest<T>(
     if (response.status === 401) {
       // Token is invalid, remove it
       removeAuthToken();
-      // Redirect to login or throw specific error
       throw new ApiError(401, "Authentication required");
     }
     throw new ApiError(response.status, `API Error: ${response.statusText}`);
@@ -144,9 +151,7 @@ export const analysisApi = {
   },
 
   // Get analysis status (for polling)
-  async getAnalysisStatus(
-    id: string
-  ): Promise<{
+  async getAnalysisStatus(id: string): Promise<{
     status: string;
     progress: number;
     current_agent?: string;
@@ -216,65 +221,4 @@ export const githubApi = {
   async getRepository(repoId: number): Promise<any> {
     return apiRequest<any>(`/api/github/repos/${repoId}`);
   },
-};
-
-// Mock data for development (remove when backend is ready)
-export const mockData = {
-  projects: [
-    {
-      id: "1",
-      name: "CodeGuard Frontend",
-      description: "Next.js frontend application",
-      repository: {
-        id: 123,
-        name: "CodeGaurd",
-        full_name: "manu042k/CodeGaurd",
-        description: "Security analysis platform",
-        private: false,
-        html_url: "https://github.com/manu042k/CodeGaurd",
-        clone_url: "https://github.com/manu042k/CodeGaurd.git",
-        language: "TypeScript",
-        stargazers_count: 5,
-        forks_count: 1,
-        updated_at: "2025-10-05T14:30:00Z",
-        created_at: "2025-10-05T10:00:00Z",
-        owner: {
-          login: "manu042k",
-          avatar_url: "https://github.com/manu042k.png",
-        },
-      },
-      userId: "user1",
-      createdAt: "2025-10-05T10:00:00Z",
-      updatedAt: "2025-10-05T14:30:00Z",
-      analysisCount: 2,
-      status: "completed" as const,
-      settings: {
-        analysisConfig: {
-          enabledAgents: [
-            "CodeQuality",
-            "Security",
-            "Architecture",
-            "Documentation",
-          ] as const,
-          excludePatterns: ["node_modules", "*.test.*"],
-          includePaths: ["src", "pages", "components"],
-        },
-        notifications: {
-          onComplete: true,
-          onFailure: true,
-        },
-      },
-      latestAnalysis: {
-        id: "analysis-1",
-        projectId: "1",
-        status: "completed" as const,
-        startedAt: "2025-10-05T14:00:00Z",
-        completedAt: "2025-10-05T14:15:00Z",
-        duration: 900, // 15 minutes
-        agents: [],
-        overallScore: 85,
-        summary: "Good code quality with some security improvements needed.",
-      },
-    },
-  ] as Project[],
 };

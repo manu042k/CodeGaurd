@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
-import { backendApi, Project, Analysis } from "@/lib/backend-api";
+import { backendAPI, Project, Analysis } from "@/lib/backend-api";
 import {
   FaShieldAlt,
   FaExclamationTriangle,
@@ -35,61 +35,135 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Safety timeout to prevent infinite loading
   useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.log("⏰ Loading timeout reached, forcing dashboard to show");
+        setLoading(false);
+        setError("Dashboard took too long to load. Please refresh the page.");
+      }
+    }, 15000); // 15 second timeout
+
+    return () => clearTimeout(timeout);
+  }, [loading]);
+
+  useEffect(() => {
+    console.log("🔍 Auth status:", { status, hasSession: !!session });
+    
     if (status === "loading") return; // Still loading
-    if (!session) router.push("/auth/signin");
+    
+    if (!session) {
+      console.log("❌ No session found, redirecting to signin");
+      router.push("/auth/signin");
+      return;
+    }
+    
+    console.log("✅ Session found, loading dashboard data");
+    loadDashboardData();
   }, [session, status, router]);
 
-  useEffect(() => {
-    if (session?.backendToken) {
-      loadDashboardData();
-    }
-  }, [session]);
-
   const loadDashboardData = async () => {
+    console.log("🚀 Starting loadDashboardData...");
+    
     try {
       setLoading(true);
       setError(null);
 
-      // Load projects and analyses in parallel
-      const [projectsData, analysesData] = await Promise.all([
-        backendApi.getProjects().catch(() => []),
-        backendApi.getAnalyses().catch(() => []),
-      ]);
+      console.log("🔄 Loading dashboard data...");
+      console.log("🔐 Session details:", {
+        hasSession: !!session,
+        hasBackendToken: !!session?.backendToken,
+        hasAccessToken: !!session?.accessToken,
+        username: session?.username
+      });
+
+      // Add timeout to prevent infinite loading
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Dashboard load timeout")), 10000)
+      );
+
+      // Test backend connection first
+      try {
+        const health = await backendAPI.healthCheck();
+        console.log("✅ Backend health:", health);
+      } catch (err) {
+        console.error("❌ Backend health check failed:", err);
+      }
+
+      // Test current user endpoint
+      try {
+        const currentUser = await backendAPI.getCurrentUser();
+        console.log("👤 Current user:", currentUser.username);
+      } catch (err) {
+        console.error("❌ Failed to get current user:", err);
+      }
+
+      // Load projects data
+      const projectsData = await backendAPI.getProjects().catch((err) => {
+        console.error("❌ Failed to load projects:", err);
+        return [];
+      });
+
+      console.log("📊 Loaded projects:", projectsData.length);
+
+      // For now, we'll calculate stats from projects
+      // TODO: Add actual analysis data when analysis endpoints are ready
+      const analysesData: Analysis[] = [];
 
       setProjects(projectsData);
       setAnalyses(analysesData);
 
-      // Calculate stats
-      const pendingAnalyses = analysesData.filter(
-        (a) => a.status === "pending" || a.status === "running"
-      ).length;
-      const completedAnalyses = analysesData.filter(
-        (a) => a.status === "completed"
-      ).length;
-
-      setStats({
+      // Calculate stats from projects
+      const stats = {
         totalProjects: projectsData.length,
         totalAnalyses: analysesData.length,
-        pendingAnalyses,
-        completedAnalyses,
-      });
+        pendingAnalyses: projectsData.filter(p => p.status === "analyzing").length,
+        completedAnalyses: projectsData.filter(p => p.status === "completed").length,
+      };
+
+      setStats(stats);
+      console.log("📈 Dashboard stats:", stats);
+      console.log("✅ Dashboard loaded successfully");
+
     } catch (err) {
-      console.error("Failed to load dashboard data:", err);
+      console.error("❌ Dashboard load failed:", err);
       setError(
-        "Failed to load dashboard data. The backend API might not be running."
+        `Failed to load dashboard: ${err instanceof Error ? err.message : 'Unknown error'}`
       );
     } finally {
+      console.log("🏁 Setting loading to false");
       setLoading(false);
     }
   };
 
-  if (status === "loading" || loading) {
+  console.log("🔄 Render check:", { 
+    status, 
+    loading, 
+    hasSession: !!session, 
+    shouldShowSpinner: status === "loading" || loading 
+  });
+
+  if (status === "loading") {
+    console.log("🔄 Showing spinner: NextAuth loading");
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+          <p className="mt-4 text-gray-600">Loading authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    console.log("🔄 Showing spinner: Dashboard loading");
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard data...</p>
+          <p className="text-sm text-gray-500 mt-2">If this takes too long, check the console for errors</p>
         </div>
       </div>
     );

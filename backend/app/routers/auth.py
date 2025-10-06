@@ -185,6 +185,20 @@ async def verify_auth(
     
     return {"valid": True, "user_id": user_id}
 
+@router.get("/test-db")
+async def test_database_connection(db: Session = Depends(get_db)):
+    """Test database connection"""
+    try:
+        # Simple query to test database
+        user_count = db.query(User).count()
+        return {"status": "ok", "user_count": user_count}
+    except Exception as e:
+        print(f"❌ Database test failed: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database connection failed: {str(e)}"
+        )
+
 @router.post("/sync-user")
 async def sync_user_from_frontend(
     user_data: dict,
@@ -192,38 +206,48 @@ async def sync_user_from_frontend(
 ):
     """Sync user data from NextAuth frontend"""
     try:
+        print(f"🔄 Syncing user data: {user_data}")
+        
         github_id = user_data.get("github_id")
         if not github_id:
+            print("❌ No GitHub ID provided")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="GitHub ID is required"
             )
         
+        print(f"🔍 Looking for user with GitHub ID: {github_id}")
+        
         # Find or create user
         user = db.query(User).filter(User.github_id == str(github_id)).first()
         
         if not user:
+            print("👤 Creating new user...")
             # Create new user
             user = User(
                 github_id=str(github_id),
-                username=user_data.get("username", ""),
-                email=user_data.get("email", ""),
-                full_name=user_data.get("full_name", ""),
-                avatar_url=user_data.get("avatar_url", ""),
-                github_token=user_data.get("github_token", "")
+                username=user_data.get("username") or "",
+                email=user_data.get("email") or "",
+                full_name=user_data.get("full_name"),
+                avatar_url=user_data.get("avatar_url"),
+                github_token=user_data.get("github_token") or ""
             )
             db.add(user)
             db.commit()
             db.refresh(user)
+            print(f"✅ Created user: {user.id}")
         else:
+            print(f"🔄 Updating existing user: {user.id}")
             # Update existing user
-            user.username = user_data.get("username", user.username)
-            user.email = user_data.get("email", user.email)
-            user.full_name = user_data.get("full_name", user.full_name)
-            user.avatar_url = user_data.get("avatar_url", user.avatar_url)
-            user.github_token = user_data.get("github_token", user.github_token)
+            user.username = user_data.get("username") or user.username
+            user.email = user_data.get("email") or user.email
+            user.full_name = user_data.get("full_name") or user.full_name
+            user.avatar_url = user_data.get("avatar_url") or user.avatar_url
+            user.github_token = user_data.get("github_token") or user.github_token
             db.commit()
+            print("✅ Updated user")
         
+        print("🎫 Creating JWT token...")
         # Create JWT token for backend API access
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         jwt_token = create_access_token(
@@ -231,7 +255,7 @@ async def sync_user_from_frontend(
             expires_delta=access_token_expires
         )
         
-        return {
+        response_data = {
             "id": user.id,
             "github_id": user.github_id,
             "username": user.username,
@@ -241,10 +265,18 @@ async def sync_user_from_frontend(
             "jwt_token": jwt_token
         }
         
+        print(f"✅ User sync successful: {user.username}")
+        return response_data
+        
     except Exception as e:
+        import traceback
+        error_msg = f"User sync failed: {str(e)}"
+        print(f"❌ {error_msg}")
+        print(f"📋 Traceback: {traceback.format_exc()}")
+        db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"User sync failed: {str(e)}"
+            detail=error_msg
         )
 
 # Dependency to get current user

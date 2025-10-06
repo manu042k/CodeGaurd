@@ -43,8 +43,7 @@ class Repository(Base):
     created_at = Column(DateTime(timezone=True))
     updated_at = Column(DateTime(timezone=True))
     
-    # Relationships
-    projects = relationship("Project", back_populates="repository")
+    # Note: Repository table exists but is not currently linked to projects
 
 class Project(Base):
     __tablename__ = "projects"
@@ -53,7 +52,10 @@ class Project(Base):
     name = Column(String, nullable=False)
     description = Column(Text)
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    repository_id = Column(Integer, ForeignKey("repositories.id"), nullable=False)
+    # Store GitHub repository information directly
+    github_repo_id = Column(Integer, nullable=False)  # GitHub repository ID
+    github_url = Column(String, nullable=False)       # GitHub repository URL
+    github_full_name = Column(String, nullable=False) # e.g., "user/repo"
     status = Column(String, default="never_analyzed")  # never_analyzed, analyzing, completed, failed
     settings = Column(JSON, default=lambda: {
         "analysisConfig": {
@@ -72,7 +74,6 @@ class Project(Base):
     
     # Relationships
     user = relationship("User", back_populates="projects")
-    repository = relationship("Repository", back_populates="projects")
     analyses = relationship("Analysis", back_populates="project", cascade="all, delete-orphan")
 
 class Analysis(Base):

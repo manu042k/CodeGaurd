@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.core.database import get_db
-from app.models.database import User
+from app.models.database import User, Repository
 from app.models.schemas import Project, ProjectCreate, ProjectUpdate, ProjectWithAnalysis
 from app.services.project_service import ProjectService
 from app.services.github_service import GitHubService
@@ -49,9 +49,9 @@ async def create_project(
     project_service = ProjectService(db)
     
     try:
-        # Validate repository access using user's GitHub token
-        github_service = GitHubService(current_user.github_token)
-        if not github_service.validate_repository_access(project_data.repository_id, current_user.id):
+        # Validate repository access using GitHub API directly
+        github_service = GitHubService(current_user.github_token, db)
+        if not github_service.validate_repository_access_by_name(project_data.github_full_name):
             raise HTTPException(status_code=403, detail="No access to repository")
         
         project = project_service.create_project(project_data, current_user.id)
@@ -59,8 +59,13 @@ async def create_project(
         
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException:
+        raise  # Re-raise HTTP exceptions
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to create project")
+        import traceback
+        print(f"Project creation error: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Failed to create project: {str(e)}")
 
 @router.put("/{project_id}", response_model=Project)
 async def update_project(

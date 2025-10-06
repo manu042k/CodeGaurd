@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import ProjectCard from "@/components/ProjectCard";
-import { Project } from "@/types/project";
-import { projectApi, analysisApi, mockData } from "@/lib/api";
+import { backendAPI, Project } from "@/lib/backend-api";
 import { FaPlus, FaGithub, FaFilter, FaSearch } from "react-icons/fa";
 import Link from "next/link";
 
@@ -38,13 +37,15 @@ export default function ProjectsPage() {
 
   const loadProjects = async () => {
     try {
+      console.log("🔄 Loading projects...");
       setLoading(true);
-      // For now, use mock data. Replace with API call when backend is ready
-      // const data = await projectApi.getProjects()
-      const data = mockData.projects;
+      const data = await backendAPI.getProjects();
+      console.log("✅ Projects loaded:", data);
       setProjects(data);
     } catch (err) {
+      console.error("❌ Failed to load projects:", err);
       setError(err instanceof Error ? err.message : "Failed to load projects");
+      setProjects([]); // Empty array when API fails
     } finally {
       setLoading(false);
     }
@@ -59,27 +60,18 @@ export default function ProjectsPage() {
         )
       );
 
-      // Start analysis (mock for now)
-      // const analysis = await analysisApi.startAnalysis({ projectId })
-      console.log("Starting analysis for project:", projectId);
+      // Start analysis
+      const analysis = await backendAPI.startAnalysis({ projectId });
+      console.log("Started analysis:", analysis.id);
 
       // Navigate to analysis page
-      // router.push(`/analysis/${analysis.id}`)
-
-      // For demo, simulate completion after 3 seconds
-      setTimeout(() => {
-        setProjects((prev) =>
-          prev.map((p) =>
-            p.id === projectId ? { ...p, status: "completed" as const } : p
-          )
-        );
-      }, 3000);
+      router.push(`/analysis/${analysis.id}`);
     } catch (err) {
       console.error("Failed to start analysis:", err);
       // Revert status
       setProjects((prev) =>
         prev.map((p) =>
-          p.id === projectId ? { ...p, status: "completed" as const } : p
+          p.id === projectId ? { ...p, status: "never_analyzed" as const } : p
         )
       );
     }
@@ -87,7 +79,7 @@ export default function ProjectsPage() {
 
   const handleDelete = async (projectId: string) => {
     try {
-      // await projectApi.deleteProject(projectId)
+      await backendAPI.deleteProject(projectId);
       setProjects((prev) => prev.filter((p) => p.id !== projectId));
     } catch (err) {
       console.error("Failed to delete project:", err);
@@ -99,7 +91,7 @@ export default function ProjectsPage() {
     const matchesSearch =
       searchQuery === "" ||
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.repository.full_name
+      project.github_full_name
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
 

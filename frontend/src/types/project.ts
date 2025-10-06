@@ -22,12 +22,14 @@ export interface Project {
   id: string;
   name: string;
   description?: string;
-  repository: Repository;
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
-  latestAnalysis?: Analysis;
-  analysisCount: number;
+  user_id: string;
+  github_repo_id: number;
+  github_url: string;
+  github_full_name: string;
+  created_at: string;
+  updated_at?: string;
+  latest_analysis?: Analysis;
+  analysis_count: number;
   status: ProjectStatus;
   settings: ProjectSettings;
 }
