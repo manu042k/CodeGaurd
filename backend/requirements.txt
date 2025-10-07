@@ -9,6 +9,30 @@ python-multipart==0.0.6
 httpx==0.25.2
 pydantic==2.5.0
 pydantic-settings==2.1.0
+redis==5.0.1
+celery==5.3.4
+PyGithub==2.1.1
+GitPython==3.1.40
 requests==2.31.0
 python-dotenv==1.0.0
-PyGithub==1.59.0
+aiofiles==23.2.1
+Pillow==10.1.0
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# LLM Providers
+openai>=1.0.0
+anthropic>=0.18.0
+google-generativeai>=0.3.0
+
+# LLM Utilities
+tiktoken>=0.5.0
+tenacity>=8.2.3
+
+# Code Analysis Tools
+PyYAML>=6.0.1
+bandit>=1.7.5  # Security vulnerability scanner for Python
+radon>=6.0.1  # Code complexity and metrics
+pylint>=3.0.0  # Code quality checker
+safety>=2.3.5  # Dependency vulnerability scanner
+astroid>=3.0.0  # AST parsing

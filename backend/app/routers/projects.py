@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.core.database import get_db
-from app.models.database import User, Repository
+from app.models.database import User
 from app.models.schemas import Project, ProjectCreate, ProjectUpdate, ProjectWithAnalysis
 from app.services.project_service import ProjectService
 from app.services.github_service import GitHubService

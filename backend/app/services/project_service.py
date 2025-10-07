@@ -1,8 +1,7 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
 from typing import List, Optional
-from app.models.database import Project, Repository, User, Analysis
-from app.models.schemas import ProjectCreate, ProjectUpdate, ProjectWithAnalysis
+from app.models.schemas import ProjectCreate, ProjectUpdate
+from app.models.database import Project, User, Analysis
 import uuid
 
 class ProjectService:
@@ -14,7 +13,7 @@ class ProjectService:
         projects = (
             self.db.query(Project)
             .filter(Project.user_id == user_id)
-            .order_by(desc(Project.updated_at))
+            .order_by(Project.updated_at.desc())
             .offset(skip)
             .limit(limit)
             .all()
@@ -25,7 +24,7 @@ class ProjectService:
             latest_analysis = (
                 self.db.query(Analysis)
                 .filter(Analysis.project_id == project.id)
-                .order_by(desc(Analysis.started_at))
+                .order_by(Analysis.started_at.desc())
                 .first()
             )
             project.latest_analysis = latest_analysis
@@ -45,7 +44,7 @@ class ProjectService:
             latest_analysis = (
                 self.db.query(Analysis)
                 .filter(Analysis.project_id == project.id)
-                .order_by(desc(Analysis.started_at))
+                .order_by(Analysis.started_at.desc())
                 .first()
             )
             project.latest_analysis = latest_analysis

@@ -25,26 +25,6 @@ class User(Base):
     # Relationships
     projects = relationship("Project", back_populates="user", cascade="all, delete-orphan")
 
-class Repository(Base):
-    __tablename__ = "repositories"
-    
-    id = Column(Integer, primary_key=True)  # GitHub repo ID
-    name = Column(String, nullable=False)
-    full_name = Column(String, nullable=False)
-    description = Column(Text)
-    private = Column(Boolean, default=False)
-    html_url = Column(String, nullable=False)
-    clone_url = Column(String, nullable=False)
-    language = Column(String)
-    stargazers_count = Column(Integer, default=0)
-    forks_count = Column(Integer, default=0)
-    owner_login = Column(String, nullable=False)
-    owner_avatar_url = Column(String)
-    created_at = Column(DateTime(timezone=True))
-    updated_at = Column(DateTime(timezone=True))
-    
-    # Note: Repository table exists but is not currently linked to projects
-
 class Project(Base):
     __tablename__ = "projects"
     
