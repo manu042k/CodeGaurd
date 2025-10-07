@@ -2,6 +2,36 @@
 
 A local, self-hosted, LLM-powered static analysis platform that helps developers analyze their code repositories for quality, security, architecture, and documentation issues.
 
+## 🎯 How It Works
+
+When you click "Run Analysis" on a project:
+
+```
+1. 📦 Clone Repository
+   ├─ Shallow clone from GitHub to /tmp
+   └─ Extract metadata (size, commits, language)
+
+2. 🤖 Multi-Agent Analysis (Parallel Execution)
+   ├─ SecurityAgent       [Rule-based + LLM]
+   ├─ DependencyAgent     [Rule-based + LLM]
+   ├─ CodeQualityAgent    [Rule-based + LLM]
+   ├─ PerformanceAgent    [Rule-based + LLM]
+   └─ BestPracticesAgent  [Rule-based + LLM]
+
+3. 📊 Aggregate & Score
+   ├─ Combine findings from all agents
+   ├─ Calculate overall score (0-100)
+   └─ Categorize by severity
+
+4. 🧹 Cleanup
+   └─ Delete cloned repository
+
+5. 📈 Display Report
+   └─ Comprehensive multi-page report with insights
+```
+
+**See [docs/ANALYSIS_FLOW.md](docs/ANALYSIS_FLOW.md) for complete flow details.**
+
 ## Features
 
 - 🔐 **GitHub SSO Authentication** - Secure login with your GitHub account
