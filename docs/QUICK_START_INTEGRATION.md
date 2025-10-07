@@ -45,6 +45,7 @@ curl -X POST http://localhost:8000/api/v1/repository-analysis/analyze \
 Clone and analyze a GitHub repository.
 
 **Request:**
+
 ```json
 {
   "repository_id": 123456,
@@ -55,6 +56,7 @@ Clone and analyze a GitHub repository.
 ```
 
 **Response:**
+
 ```json
 {
   "status": "success",
@@ -302,6 +304,7 @@ backend/
 ## 💬 Support
 
 Need help? Check:
+
 1. Test files for examples
 2. Documentation in `/docs`
 3. API documentation at http://localhost:8000/docs
@@ -309,4 +312,4 @@ Need help? Check:
 
 ---
 
-*Quick Start Guide - Last Updated: October 6, 2025*
+_Quick Start Guide - Last Updated: October 6, 2025_

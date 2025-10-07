@@ -45,11 +45,19 @@ async def get_analysis(
     db: Session = Depends(get_db)
 ):
     """Get analysis by ID"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"🔍 Fetching analysis: {analysis_id} for user: {current_user.username}")
+    
     analysis_service = AnalysisService(db)
     analysis = analysis_service.get_analysis_by_id(analysis_id, current_user.id)
     
     if not analysis:
+        logger.warning(f"❌ Analysis not found: {analysis_id}")
         raise HTTPException(status_code=404, detail="Analysis not found")
+    
+    logger.info(f"✅ Analysis found: {analysis_id}, status: {analysis.status}, agents: {len(analysis.agent_results)}")
     
     return analysis
 

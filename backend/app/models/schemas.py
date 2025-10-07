@@ -139,7 +139,7 @@ class AgentResultBase(BaseModel):
     agent_name: AgentType
     status: AnalysisStatus
     score: Optional[float] = None
-    summary: str = ""
+    summary: Optional[str] = None
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     duration: Optional[int] = None

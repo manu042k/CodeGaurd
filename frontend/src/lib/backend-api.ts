@@ -64,13 +64,42 @@ export interface ProjectCreate {
   };
 }
 
+export interface Issue {
+  id: string;
+  type: "error" | "warning" | "info" | "suggestion";
+  severity: "critical" | "high" | "medium" | "low";
+  title: string;
+  description: string;
+  file_path?: string;
+  line_number?: number;
+  column_number?: number;
+  rule?: string;
+}
+
+export interface AgentResult {
+  id: string;
+  agent_name: "CodeQuality" | "Security" | "Architecture" | "Documentation";
+  status: "pending" | "running" | "completed" | "failed";
+  score?: number;
+  summary?: string;
+  started_at?: string;
+  completed_at?: string;
+  duration?: number;
+  error?: string;
+  issues: Issue[];
+}
+
 export interface Analysis {
   id: string;
   project_id: string;
-  status: string;
-  results?: any;
-  created_at: string;
-  updated_at?: string;
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
+  started_at: string;
+  completed_at?: string;
+  duration?: number;
+  overall_score?: number;
+  summary?: string;
+  error?: string;
+  agent_results: AgentResult[];
 }
 
 // Backend API client with NextAuth integration
@@ -186,15 +215,18 @@ export class BackendAPI {
   async startAnalysis(data: { projectId: string }): Promise<Analysis> {
     return this.apiRequest<Analysis>("/api/analyses/", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify({ project_id: data.projectId }),
     });
   }
 
   async getAnalysis(id: string): Promise<Analysis> {
-    return this.apiRequest<Analysis>(`/api/analyses/${id}/`);
+    console.log(`🔍 Fetching analysis: ${id}`);
+    const result = await this.apiRequest<Analysis>(`/api/analyses/${id}/`);
+    console.log(`✅ Analysis fetched:`, result);
+    return result;
   }
 
-  async getAnalysisStatus(id: string): Promise<{
+  async getProjectAnalysisStatus(id: string): Promise<{
     status: string;
     progress: number;
     current_agent?: string;
@@ -210,6 +242,33 @@ export class BackendAPI {
 
   async getRepository(repoId: number): Promise<any> {
     return this.apiRequest<any>(`/api/github/repos/${repoId}/`);
+  }
+
+  // Repository Analysis API methods
+  async analyzeRepository(data: {
+    repository_id: number;
+    shallow_clone?: boolean;
+    use_llm?: boolean;
+    enabled_agents?: string[];
+  }): Promise<{
+    status: string;
+    message: string;
+    report: any;
+  }> {
+    return this.apiRequest("/api/repository-analysis/analyze", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getAnalysisStatus(analysisId: string): Promise<{
+    repository_id: number;
+    status: string;
+    message?: string;
+  }> {
+    return this.apiRequest(
+      `/api/repository-analysis/analyze/${analysisId}/status`
+    );
   }
 
   // User API methods
@@ -257,6 +316,31 @@ export class BackendAPI {
 
 // Export singleton instance
 export const backendAPI = new BackendAPI();
+
+// Export standalone functions for convenience
+export const getProjects = () => backendAPI.getProjects();
+export const getProjectById = (id: string) => backendAPI.getProject(id);
+export const createProject = (data: ProjectCreate) =>
+  backendAPI.createProject(data);
+export const updateProject = (id: string, data: Partial<Project>) =>
+  backendAPI.updateProject(id, data);
+export const deleteProject = (id: string) => backendAPI.deleteProject(id);
+export const startAnalysis = (projectId: string) =>
+  backendAPI.startAnalysis({ projectId });
+export const getAnalysis = (id: string) => backendAPI.getAnalysis(id);
+export const getProjectAnalysisStatus = (id: string) =>
+  backendAPI.getProjectAnalysisStatus(id);
+export const getRepositories = () => backendAPI.getRepositories();
+export const getRepository = (repoId: number) =>
+  backendAPI.getRepository(repoId);
+export const analyzeRepository = (
+  data: Parameters<BackendAPI["analyzeRepository"]>[0]
+) => backendAPI.analyzeRepository(data);
+export const getAnalysisStatus = (analysisId: string) =>
+  backendAPI.getAnalysisStatus(analysisId);
+export const getCurrentUser = () => backendAPI.getCurrentUser();
+export const healthCheck = () => backendAPI.healthCheck();
+export const testConnection = () => backendAPI.testConnection();
 
 // Export as default for easy importing
 export default backendAPI;

@@ -3,6 +3,7 @@
 ## 📋 Executive Summary
 
 We're building a comprehensive, multi-agent code analysis system for CodeGuard that analyzes repositories for:
+
 - Security vulnerabilities
 - Code quality issues
 - Performance problems
@@ -19,28 +20,32 @@ We're building a comprehensive, multi-agent code analysis system for CodeGuard t
 ## 🎯 Complete Implementation Roadmap
 
 ### ✅ PHASE 1: FOUNDATION (COMPLETE)
+
 **Duration:** 1 day | **Status:** ✅ Done
 
-| Component | Status | Lines | Description |
-|-----------|--------|-------|-------------|
-| Base Agent | ✅ | 262 | Abstract class, Issue/Result models, scoring |
-| File Scanner | ✅ | 325 | Directory traversal, filtering, metadata |
-| Language Detector | ✅ | 265 | 48 languages, shebang detection |
-| Config System | ✅ | 113 | YAML configs, rule management |
-| Security Agent | ✅ | 465 | 10+ vulnerability checks |
-| Test Script | ✅ | 150 | Component verification |
+| Component         | Status | Lines | Description                                  |
+| ----------------- | ------ | ----- | -------------------------------------------- |
+| Base Agent        | ✅     | 262   | Abstract class, Issue/Result models, scoring |
+| File Scanner      | ✅     | 325   | Directory traversal, filtering, metadata     |
+| Language Detector | ✅     | 265   | 48 languages, shebang detection              |
+| Config System     | ✅     | 113   | YAML configs, rule management                |
+| Security Agent    | ✅     | 465   | 10+ vulnerability checks                     |
+| Test Script       | ✅     | 150   | Component verification                       |
 
 **Total:** ~1,700 lines of production code
 
 ---
 
 ### 🔄 PHASE 2: CORE AGENTS (IN PROGRESS)
+
 **Duration:** 3-4 days | **Status:** 20% Complete
 
 #### 2.1: Dependency Agent (Next Up)
+
 **Priority:** CRITICAL | **Estimated Time:** 4-6 hours
 
 **Capabilities:**
+
 ```python
 ✓ Parse package files (requirements.txt, package.json, go.mod, etc.)
 ✓ Check for outdated packages
@@ -51,6 +56,7 @@ We're building a comprehensive, multi-agent code analysis system for CodeGuard t
 ```
 
 **Tech Stack:**
+
 - Python: `pip-audit`, `safety`
 - JavaScript: npm audit API
 - Go: go.mod parsing
@@ -58,9 +64,11 @@ We're building a comprehensive, multi-agent code analysis system for CodeGuard t
 ---
 
 #### 2.2: Code Quality Agent
+
 **Priority:** HIGH | **Estimated Time:** 4-6 hours
 
 **Capabilities:**
+
 ```python
 ✓ Calculate cyclomatic complexity (using radon)
 ✓ Detect code smells:
@@ -74,6 +82,7 @@ We're building a comprehensive, multi-agent code analysis system for CodeGuard t
 ```
 
 **Metrics:**
+
 - Cyclomatic Complexity: Threshold = 10
 - Function Length: Threshold = 50 lines
 - Class Length: Threshold = 300 lines
@@ -82,9 +91,11 @@ We're building a comprehensive, multi-agent code analysis system for CodeGuard t
 ---
 
 #### 2.3: Performance Agent
+
 **Priority:** HIGH | **Estimated Time:** 4-6 hours
 
 **Capabilities:**
+
 ```python
 ✓ Detect N+1 query patterns
 ✓ Find nested loops (>3 levels)
@@ -96,6 +107,7 @@ We're building a comprehensive, multi-agent code analysis system for CodeGuard t
 ```
 
 **Patterns to Detect:**
+
 - `for x in list: db.query()` (N+1)
 - `while ... while ... while ...` (nested loops)
 - `str += str` in loops (inefficient string concat)
@@ -103,9 +115,11 @@ We're building a comprehensive, multi-agent code analysis system for CodeGuard t
 ---
 
 #### 2.4: Best Practices Agent
+
 **Priority:** MEDIUM | **Estimated Time:** 3-4 hours
 
 **Capabilities:**
+
 ```python
 ✓ Language-specific best practices:
   - Python: PEP 8 guidelines
@@ -119,9 +133,11 @@ We're building a comprehensive, multi-agent code analysis system for CodeGuard t
 ---
 
 #### 2.5: Test Coverage Agent
+
 **Priority:** MEDIUM | **Estimated Time:** 3-4 hours
 
 **Capabilities:**
+
 ```python
 ✓ Identify test files by pattern
 ✓ Calculate test coverage (if .coverage data exists)
@@ -135,9 +151,11 @@ We're building a comprehensive, multi-agent code analysis system for CodeGuard t
 ---
 
 #### 2.6: Code Style Agent
+
 **Priority:** LOW | **Estimated Time:** 2-3 hours
 
 **Capabilities:**
+
 ```python
 ✓ Check formatting (PEP 8, ESLint rules)
 ✓ Validate indentation (tabs vs spaces)
@@ -149,9 +167,11 @@ We're building a comprehensive, multi-agent code analysis system for CodeGuard t
 ---
 
 #### 2.7: Documentation Agent
+
 **Priority:** LOW | **Estimated Time:** 2-3 hours
 
 **Capabilities:**
+
 ```python
 ✓ Check for missing docstrings
 ✓ Validate docstring format (Google/NumPy/Sphinx)
@@ -163,37 +183,41 @@ We're building a comprehensive, multi-agent code analysis system for CodeGuard t
 ---
 
 ### 📊 PHASE 3: COORDINATION LAYER
+
 **Duration:** 2 days | **Status:** Not Started
 
 #### 3.1: Analysis Coordinator
+
 **File:** `coordinator/analysis_coordinator.py`
 
 **Responsibilities:**
+
 ```python
 class AnalysisCoordinator:
     def __init__(self, agents: List[BaseAgent])
-    
+
     async def analyze_repository(self, repo_path: str) -> RepositoryReport:
         # 1. Scan files
         files = file_scanner.scan_directory(repo_path)
-        
+
         # 2. Detect languages
         for file in files:
             file.language = language_detector.detect(file.path)
-        
+
         # 3. Assign agents to files
         analysis_tasks = self._create_tasks(files)
-        
+
         # 4. Run analyses in parallel
         results = await asyncio.gather(*analysis_tasks)
-        
+
         # 5. Aggregate results
         report = result_aggregator.aggregate(results)
-        
+
         return report
 ```
 
 **Features:**
+
 - ✅ Parallel execution with `asyncio`
 - ✅ Progress tracking with callbacks
 - ✅ Error handling and retry logic
@@ -203,27 +227,29 @@ class AnalysisCoordinator:
 ---
 
 #### 3.2: Result Aggregator
+
 **File:** `coordinator/result_aggregator.py`
 
 **Responsibilities:**
+
 ```python
 class ResultAggregator:
     def aggregate(self, results: List[AgentResult]) -> RepositoryReport:
         # 1. Deduplicate issues
         unique_issues = self._deduplicate(results)
-        
+
         # 2. Prioritize by severity
         sorted_issues = self._sort_by_priority(unique_issues)
-        
+
         # 3. Group by category
         categorized = self._categorize(sorted_issues)
-        
+
         # 4. Calculate aggregate scores
         scores = self._calculate_scores(results)
-        
+
         # 5. Generate summary statistics
         stats = self._generate_stats(results)
-        
+
         return RepositoryReport(
             issues=categorized,
             scores=scores,
@@ -232,6 +258,7 @@ class ResultAggregator:
 ```
 
 **Features:**
+
 - ✅ Deduplication of identical issues
 - ✅ Severity-based prioritization
 - ✅ Category grouping (security, quality, etc.)
@@ -241,9 +268,11 @@ class ResultAggregator:
 ---
 
 ### 🔌 PHASE 4: API INTEGRATION
+
 **Duration:** 2 days | **Status:** Not Started
 
 #### 4.1: Backend API Endpoints
+
 **File:** `routers/analysis_v2.py`
 
 ```python
@@ -271,6 +300,7 @@ async def get_analysis_results(task_id: str):
 ---
 
 #### 4.2: Celery Tasks Integration
+
 **File:** `services/tasks.py`
 
 ```python
@@ -282,16 +312,17 @@ def analyze_repository_multi_agent(project_id: str, config: dict):
         repo_path=get_repo_path(project_id),
         config=config
     )
-    
+
     # Store results in database
     await store_analysis_results(project_id, result)
-    
+
     return result.to_dict()
 ```
 
 ---
 
 #### 4.3: WebSocket Support
+
 **File:** `routers/analysis_ws.py`
 
 ```python
@@ -299,7 +330,7 @@ def analyze_repository_multi_agent(project_id: str, config: dict):
 async def analysis_progress_websocket(websocket: WebSocket, task_id: str):
     """Real-time progress updates via WebSocket"""
     await websocket.accept()
-    
+
     async for progress in coordinator.stream_progress(task_id):
         await websocket.send_json({
             "task_id": task_id,
@@ -313,9 +344,11 @@ async def analysis_progress_websocket(websocket: WebSocket, task_id: str):
 ---
 
 ### 🎨 PHASE 5: FRONTEND INTEGRATION
+
 **Duration:** 2 days | **Status:** Not Started
 
 #### 5.1: Analysis Dashboard Component
+
 **File:** `frontend/src/components/MultiAgentAnalysis.tsx`
 
 ```typescript
@@ -336,6 +369,7 @@ function MultiAgentAnalysisDashboard() {
 ```
 
 **Features:**
+
 - 📊 Real-time progress bar
 - 🔍 Filter by agent/severity/file
 - 📈 Interactive charts (issues over time, by category)
@@ -345,6 +379,7 @@ function MultiAgentAnalysisDashboard() {
 ---
 
 #### 5.2: Issue Detail Component
+
 **File:** `frontend/src/components/IssueDetail.tsx`
 
 ```typescript
@@ -354,8 +389,8 @@ function IssueDetail({ issue }: { issue: Issue }) {
       <Badge severity={issue.severity}>{issue.severity}</Badge>
       <h3>{issue.title}</h3>
       <p>{issue.description}</p>
-      <CodeBlock 
-        code={issue.code_snippet} 
+      <CodeBlock
+        code={issue.code_snippet}
         language={issue.language}
         highlightLine={issue.line_number}
       />
@@ -368,9 +403,11 @@ function IssueDetail({ issue }: { issue: Issue }) {
 ---
 
 ### 🧪 PHASE 6: TESTING & OPTIMIZATION
+
 **Duration:** 2 days | **Status:** Not Started
 
 #### 6.1: Unit Tests
+
 ```bash
 tests/
 ├── test_agents/
@@ -392,12 +429,13 @@ tests/
 ---
 
 #### 6.2: Integration Tests
+
 ```python
 async def test_full_repository_analysis():
     """Test complete analysis pipeline"""
     coordinator = AnalysisCoordinator(all_agents)
     result = await coordinator.analyze_repository("./test_repo")
-    
+
     assert result.overall_score > 0
     assert len(result.issues) > 0
     assert all(agent in result.agent_results for agent in all_agents)
@@ -406,12 +444,15 @@ async def test_full_repository_analysis():
 ---
 
 #### 6.3: Performance Optimization
+
 **Targets:**
+
 - ⚡ Analyze 1000 files in < 2 minutes
 - 💾 Memory usage < 500MB for large repos
 - 🔄 Support incremental analysis (git diff)
 
 **Techniques:**
+
 - Parallel agent execution
 - File content caching
 - Lazy loading of analysis rules
@@ -422,43 +463,45 @@ async def test_full_repository_analysis():
 ## 📊 Success Metrics
 
 ### Functional Metrics
+
 ✅ **Coverage:** All major code quality aspects covered  
 ✅ **Accuracy:** < 5% false positive rate  
 ✅ **Languages:** Support 40+ programming languages  
-✅ **Speed:** Process 1000 files in 2 minutes  
+✅ **Speed:** Process 1000 files in 2 minutes
 
 ### Quality Metrics
+
 ✅ **Code Coverage:** 80%+ test coverage  
 ✅ **Documentation:** All public APIs documented  
 ✅ **Maintainability:** Easy to add new agents  
-✅ **Usability:** Clear, actionable reports  
+✅ **Usability:** Clear, actionable reports
 
 ---
 
 ## 🛠️ Tech Stack Summary
 
-| Layer | Technologies |
-|-------|-------------|
-| **Backend** | Python 3.9+, FastAPI, SQLAlchemy |
-| **Analysis** | bandit, radon, pylint, safety, astroid |
-| **Async** | asyncio, aiofiles |
-| **Config** | PyYAML |
-| **Testing** | pytest, pytest-asyncio |
-| **Frontend** | React, TypeScript, Next.js |
-| **Real-time** | WebSocket, Server-Sent Events |
+| Layer         | Technologies                           |
+| ------------- | -------------------------------------- |
+| **Backend**   | Python 3.9+, FastAPI, SQLAlchemy       |
+| **Analysis**  | bandit, radon, pylint, safety, astroid |
+| **Async**     | asyncio, aiofiles                      |
+| **Config**    | PyYAML                                 |
+| **Testing**   | pytest, pytest-asyncio                 |
+| **Frontend**  | React, TypeScript, Next.js             |
+| **Real-time** | WebSocket, Server-Sent Events          |
 
 ---
 
 ## 📅 Timeline
 
-| Phase | Duration | Start | End | Status |
-|-------|----------|-------|-----|--------|
-| Phase 1: Foundation | 1 day | Day 1 | Day 1 | ✅ Done |
-| Phase 2: Core Agents | 4 days | Day 2 | Day 5 | 🔄 20% |
-| Phase 3: Coordination | 2 days | Day 6 | Day 7 | ⏳ Pending |
-| Phase 4: API Integration | 2 days | Day 8 | Day 9 | ⏳ Pending |
-| Phase 5: Frontend | 2 days | Day 10 | Day 11 | ⏳ Pending |
-| Phase 6: Testing | 2 days | Day 12 | Day 13 | ⏳ Pending |
+| Phase                    | Duration | Start  | End    | Status     |
+| ------------------------ | -------- | ------ | ------ | ---------- |
+| Phase 1: Foundation      | 1 day    | Day 1  | Day 1  | ✅ Done    |
+| Phase 2: Core Agents     | 4 days   | Day 2  | Day 5  | 🔄 20%     |
+| Phase 3: Coordination    | 2 days   | Day 6  | Day 7  | ⏳ Pending |
+| Phase 4: API Integration | 2 days   | Day 8  | Day 9  | ⏳ Pending |
+| Phase 5: Frontend        | 2 days   | Day 10 | Day 11 | ⏳ Pending |
+| Phase 6: Testing         | 2 days   | Day 12 | Day 13 | ⏳ Pending |
 
 **Total Estimated Duration:** 13 days  
 **Current Progress:** Day 1 Complete (7.7%)
@@ -501,16 +544,19 @@ asyncio.run(test())
 ## 📞 Next Steps
 
 ### Immediate (Today/Tomorrow)
+
 1. ✅ **Complete:** Foundation + Security Agent
 2. 🔄 **Next:** Build Dependency Agent
 3. 🔄 **Then:** Build Code Quality Agent
 
 ### This Week
+
 4. Build remaining agents (Performance, Best Practices, etc.)
 5. Create coordination layer
 6. Add API endpoints
 
 ### Next Week
+
 7. Frontend integration
 8. Testing & optimization
 9. Documentation & deployment
@@ -530,6 +576,7 @@ asyncio.run(test())
 **Let's continue! Ready to build the Dependency Agent?** 🚀
 
 Or would you prefer to:
+
 - A) Continue with Dependency Agent
 - B) Jump to Coordination Layer first
 - C) Add more features to Security Agent

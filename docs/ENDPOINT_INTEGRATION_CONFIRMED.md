@@ -17,6 +17,7 @@ POST   /api/repository-analysis/analyze-batch              # Batch Analysis (fut
 ```
 
 ### Other Endpoints
+
 ```
 GET    /api/github/repos                                   # List User Repositories
 GET    /api/github/repos/{repo_id}                         # Get Repository Details
@@ -29,10 +30,11 @@ GET    /api/analyses/{analysis_id}                         # Get Analysis Result
 ## 🔗 Endpoint Registration Confirmed
 
 **File: `backend/app/main.py` (Line 35)**
+
 ```python
 app.include_router(
-    repository_analysis.router, 
-    prefix=f"{settings.API_V1_STR}/repository-analysis", 
+    repository_analysis.router,
+    prefix=f"{settings.API_V1_STR}/repository-analysis",
     tags=["repository-analysis"]
 )
 ```
@@ -40,7 +42,7 @@ app.include_router(
 ✅ Router imported  
 ✅ Router registered  
 ✅ Prefix configured: `/api/repository-analysis`  
-✅ Tag added for API documentation  
+✅ Tag added for API documentation
 
 ---
 
@@ -232,6 +234,7 @@ print(f"Issues: {result['report']['analysis']['total_issues']}")
 ## 🧪 Test the Endpoint Now
 
 ### Step 1: Get Repository ID
+
 ```bash
 # List your repositories
 curl -X GET http://localhost:8000/api/github/repos \
@@ -239,6 +242,7 @@ curl -X GET http://localhost:8000/api/github/repos \
 ```
 
 ### Step 2: Analyze Repository
+
 ```bash
 # Use the repository_id from step 1
 curl -X POST http://localhost:8000/api/repository-analysis/analyze \
@@ -252,6 +256,7 @@ curl -X POST http://localhost:8000/api/repository-analysis/analyze \
 ```
 
 ### Step 3: View in Browser
+
 Open: http://localhost:8000/docs
 
 Look for the **repository-analysis** section!
@@ -310,7 +315,7 @@ The complete workflow from HTTP request → GitHub clone → Multi-agent analysi
 
 ---
 
-*Endpoint Integration Confirmed: October 6, 2025*  
-*Status: FULLY OPERATIONAL ✅*  
-*Endpoint: `/api/repository-analysis/analyze`*  
-*Method: POST*
+_Endpoint Integration Confirmed: October 6, 2025_  
+_Status: FULLY OPERATIONAL ✅_  
+_Endpoint: `/api/repository-analysis/analyze`_  
+_Method: POST_

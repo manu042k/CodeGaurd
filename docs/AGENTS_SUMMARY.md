@@ -5,7 +5,9 @@
 ### What We Built
 
 #### 1. **Base Agent Architecture** (`agents/base_agent.py`)
+
 A robust foundation for all analysis agents:
+
 - **BaseAgent Abstract Class**: Template for all agents
 - **Severity Enum**: CRITICAL, HIGH, MEDIUM, LOW, INFO
 - **Issue Dataclass**: Standardized issue reporting with:
@@ -18,7 +20,9 @@ A robust foundation for all analysis agents:
 - **Logging System**: Built-in logging for all agents
 
 #### 2. **File Scanner** (`utils/file_scanner.py`)
+
 Intelligent file discovery system:
+
 - Recursive directory traversal
 - Smart filtering (excludes node_modules, venv, .git, etc.)
 - Binary file detection
@@ -27,7 +31,9 @@ Intelligent file discovery system:
 - Support for 40+ code file extensions
 
 #### 3. **Language Detector** (`parsers/language_detector.py`)
+
 Multi-language support:
+
 - **48 supported languages** including:
   - Python, JavaScript, TypeScript
   - Java, Go, Rust, C/C++, C#
@@ -38,7 +44,9 @@ Multi-language support:
 - Filename-based detection (Dockerfile, Makefile)
 
 #### 4. **Configuration System** (`config/`)
+
 Flexible, YAML-based configuration:
+
 - **agent_config.yaml**: Settings for each agent
 - **rules.yaml**: 100+ analysis rules covering:
   - Security vulnerabilities (10+ types)
@@ -50,7 +58,9 @@ Flexible, YAML-based configuration:
 - **ConfigManager**: Lazy loading with caching
 
 #### 5. **Security Agent** (`agents/security_agent.py`) ⭐
+
 Our first fully-functional agent:
+
 - **10+ Security Checks**:
   - SQL Injection detection
   - XSS vulnerability detection
@@ -71,6 +81,7 @@ Our first fully-functional agent:
 ## 📊 Statistics
 
 ### Code Metrics
+
 ```
 Total Files Created: 14
 Total Lines of Code: ~1,700+
@@ -80,6 +91,7 @@ Documentation: 2
 ```
 
 ### Test Results ✅
+
 ```
 ✓ Language Detector: 48 languages supported
 ✓ File Scanner: Successfully scans directories
@@ -123,6 +135,7 @@ CodeGuard Backend
 ### Remaining Agents to Build (Priority Order)
 
 #### 1. **Dependency Agent** (Next Up) 🔄
+
 ```python
 # What it will do:
 - Parse: requirements.txt, package.json, go.mod, Gemfile
@@ -133,6 +146,7 @@ CodeGuard Backend
 ```
 
 #### 2. **Code Quality Agent**
+
 ```python
 # What it will do:
 - Calculate cyclomatic complexity using radon
@@ -143,6 +157,7 @@ CodeGuard Backend
 ```
 
 #### 3. **Performance Agent**
+
 ```python
 # What it will do:
 - Detect N+1 query patterns
@@ -152,6 +167,7 @@ CodeGuard Backend
 ```
 
 #### 4. **Best Practices Agent**
+
 ```python
 # What it will do:
 - Language-specific best practices
@@ -161,6 +177,7 @@ CodeGuard Backend
 ```
 
 #### 5. **Test Coverage Agent**
+
 ```python
 # What it will do:
 - Identify test files
@@ -170,6 +187,7 @@ CodeGuard Backend
 ```
 
 #### 6. **Code Style Agent**
+
 ```python
 # What it will do:
 - Check formatting (PEP 8, ESLint, etc.)
@@ -179,6 +197,7 @@ CodeGuard Backend
 ```
 
 #### 7. **Documentation Agent**
+
 ```python
 # What it will do:
 - Check for missing docstrings
@@ -192,18 +211,19 @@ CodeGuard Backend
 ## 🔧 Implementation Strategy
 
 ### Each Agent Follows This Pattern:
+
 ```python
 class NewAgent(BaseAgent):
     # 1. Define metadata
     @property
     def name(self) -> str: ...
-    
+
     @property
     def version(self) -> str: ...
-    
+
     @property
     def supported_languages(self) -> List[str]: ...
-    
+
     # 2. Implement analysis
     async def analyze(self, file_path, file_content, language, **kwargs):
         # - Load rules from config
@@ -214,6 +234,7 @@ class NewAgent(BaseAgent):
 ```
 
 ### After All Agents Are Done:
+
 ```python
 # 3. Build Coordinator
 class AnalysisCoordinator:
@@ -230,12 +251,14 @@ class AnalysisCoordinator:
 ## 🚀 How to Use (Current State)
 
 ### 1. Test the Security Agent
+
 ```bash
 cd /Users/manu042k/Documents/CodeGaurd/backend
 python3 test_agents.py
 ```
 
 ### 2. Use Security Agent Programmatically
+
 ```python
 from app.agents.security_agent import SecurityAgent
 
@@ -253,6 +276,7 @@ for issue in result.issues:
 ```
 
 ### 3. Scan Directory for Code Files
+
 ```python
 from app.utils.file_scanner import FileScanner
 
@@ -268,15 +292,19 @@ for file in files:
 ## 💡 Key Design Decisions
 
 ### 1. **Async by Design**
+
 All agents use `async def analyze()` to enable future parallel execution via `asyncio.gather()`.
 
 ### 2. **Configuration-Driven**
+
 All rules in YAML files = easy to update without code changes.
 
 ### 3. **Language-Agnostic Architecture**
+
 Agents check `supported_languages` and rules check language compatibility.
 
 ### 4. **Severity-Based Scoring**
+
 ```python
 CRITICAL = -2.0 points
 HIGH     = -1.5 points
@@ -286,6 +314,7 @@ INFO     = -0.1 points
 ```
 
 ### 5. **Extensible by Design**
+
 Want a new agent? Just extend `BaseAgent` and implement `analyze()`.
 
 ---
@@ -306,6 +335,7 @@ astroid>=3.0.0          # AST parsing
 ## 🎓 What We Learned
 
 ### Strengths
+
 1. ✅ Clean separation of concerns
 2. ✅ Highly extensible architecture
 3. ✅ Comprehensive security coverage
@@ -313,6 +343,7 @@ astroid>=3.0.0          # AST parsing
 5. ✅ Configuration-driven rules
 
 ### Areas for Future Enhancement
+
 1. 🔄 Add AST-based analysis (deeper than regex)
 2. 🔄 Reduce false positives with context awareness
 3. 🔄 Add caching for large repositories
@@ -339,6 +370,7 @@ Overall Progress: 20%
 ## 🎯 Immediate Next Action
 
 **Build the Dependency Agent** to check for:
+
 - Outdated packages
 - Known vulnerabilities (CVEs)
 - License issues

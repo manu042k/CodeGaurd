@@ -42,6 +42,7 @@ CodeGaurd/backend/app/
 ## 🔧 Core Classes
 
 ### BaseAgent (Abstract)
+
 ```python
 from app.agents.base_agent import BaseAgent, Issue, Severity
 
@@ -49,15 +50,15 @@ class MyAgent(BaseAgent):
     @property
     def name(self) -> str:
         return "MyAgent"
-    
+
     @property
     def version(self) -> str:
         return "1.0.0"
-    
+
     @property
     def supported_languages(self) -> List[str]:
         return ["python", "javascript"]
-    
+
     async def analyze(self, file_path, file_content, language, **kwargs):
         issues = []
         # ... your analysis logic ...
@@ -65,6 +66,7 @@ class MyAgent(BaseAgent):
 ```
 
 ### Issue (Dataclass)
+
 ```python
 issue = Issue(
     title="SQL Injection Vulnerability",
@@ -79,6 +81,7 @@ issue = Issue(
 ```
 
 ### AgentResult (Dataclass)
+
 ```python
 result = AgentResult(
     agent_name="SecurityAgent",
@@ -95,6 +98,7 @@ result = AgentResult(
 ## 🛠️ Utility Classes
 
 ### FileScanner
+
 ```python
 from app.utils.file_scanner import FileScanner
 
@@ -110,6 +114,7 @@ for file in files:
 ```
 
 ### LanguageDetector
+
 ```python
 from app.parsers.language_detector import LanguageDetector
 
@@ -122,6 +127,7 @@ language = LanguageDetector.detect_language("script", content)  # "python"
 ```
 
 ### ConfigManager
+
 ```python
 from app.config import get_config_manager
 
@@ -141,7 +147,9 @@ print(rules["sql_injection"])
 ## 📊 Completed Features
 
 ### ✅ Security Agent
+
 Detects 10+ vulnerability types:
+
 - SQL Injection
 - XSS (Cross-Site Scripting)
 - Hardcoded Secrets (passwords, API keys)
@@ -154,6 +162,7 @@ Detects 10+ vulnerability types:
 - JavaScript-specific issues
 
 **Usage:**
+
 ```python
 import asyncio
 from app.agents.security_agent import SecurityAgent
@@ -165,10 +174,10 @@ async def analyze_code():
         file_content=open("app.py").read(),
         language="python"
     )
-    
+
     print(f"Score: {result.score}/10")
     print(f"Issues: {len(result.issues)}")
-    
+
     for issue in result.issues:
         print(f"\n[{issue.severity.value}] {issue.title}")
         print(f"  Line {issue.line_number}: {issue.code_snippet}")
@@ -181,28 +190,30 @@ asyncio.run(analyze_code())
 
 ## 🎯 Agent Priority List
 
-| Agent | Priority | Status | Estimated Time |
-|-------|----------|--------|----------------|
-| Security | Critical | ✅ Done | - |
-| Dependency | Critical | 🔄 Next | 4-6h |
-| Code Quality | High | ⏳ | 4-6h |
-| Performance | High | ⏳ | 4-6h |
-| Best Practices | Medium | ⏳ | 3-4h |
-| Test Coverage | Medium | ⏳ | 3-4h |
-| Code Style | Low | ⏳ | 2-3h |
-| Documentation | Low | ⏳ | 2-3h |
+| Agent          | Priority | Status  | Estimated Time |
+| -------------- | -------- | ------- | -------------- |
+| Security       | Critical | ✅ Done | -              |
+| Dependency     | Critical | 🔄 Next | 4-6h           |
+| Code Quality   | High     | ⏳      | 4-6h           |
+| Performance    | High     | ⏳      | 4-6h           |
+| Best Practices | Medium   | ⏳      | 3-4h           |
+| Test Coverage  | Medium   | ⏳      | 3-4h           |
+| Code Style     | Low      | ⏳      | 2-3h           |
+| Documentation  | Low      | ⏳      | 2-3h           |
 
 ---
 
 ## 🧪 Testing
 
 ### Run Component Tests
+
 ```bash
 cd /Users/manu042k/Documents/CodeGaurd/backend
 python3 test_agents.py
 ```
 
 ### Expected Output
+
 ```
 ✅ Language Detector: 48 languages supported
 ✅ Security Agent: 3/3 vulnerabilities detected
@@ -214,6 +225,7 @@ python3 test_agents.py
 ## 📝 Configuration Files
 
 ### agent_config.yaml
+
 ```yaml
 global:
   max_file_size_mb: 10
@@ -224,7 +236,7 @@ security:
   enabled: true
   severity_threshold: "low"
   rules: [sql_injection, xss_vulnerability, ...]
-  
+
 code_quality:
   enabled: true
   max_complexity: 10
@@ -232,6 +244,7 @@ code_quality:
 ```
 
 ### rules.yaml
+
 ```yaml
 security_rules:
   sql_injection:
@@ -287,6 +300,7 @@ print(LanguageDetector.detect_language('app.tsx'))
 ## 🐛 Troubleshooting
 
 ### Import Errors
+
 ```bash
 # Make sure you're in the backend directory
 cd /Users/manu042k/Documents/CodeGaurd/backend
@@ -296,11 +310,13 @@ export PYTHONPATH=$PYTHONPATH:$(pwd)
 ```
 
 ### Missing Dependencies
+
 ```bash
 pip3 install -r requirements.txt
 ```
 
 ### Config File Not Found
+
 ```python
 from pathlib import Path
 config_dir = Path(__file__).parent / "app" / "config"
@@ -312,12 +328,14 @@ print(f"Looking for config in: {config_dir}")
 ## 📚 Resources
 
 ### Documentation Files
+
 - `COMPLETE_ROADMAP.md` - Full implementation plan
-- `AGENTS_IMPLEMENTATION_PLAN.md` - Detailed phase breakdown  
+- `AGENTS_IMPLEMENTATION_PLAN.md` - Detailed phase breakdown
 - `AGENTS_PROGRESS.md` - Current progress tracking
 - `AGENTS_SUMMARY.md` - What we've built so far
 
 ### Key Files to Reference
+
 - `base_agent.py` - Template for new agents
 - `security_agent.py` - Complete agent example
 - `rules.yaml` - Pattern examples
@@ -328,6 +346,7 @@ print(f"Looking for config in: {config_dir}")
 ## 💡 Tips
 
 ### Adding a New Agent
+
 1. Create `agents/my_agent.py`
 2. Extend `BaseAgent`
 3. Implement `name`, `version`, `supported_languages`
@@ -337,7 +356,9 @@ print(f"Looking for config in: {config_dir}")
 7. Test with sample code
 
 ### Adding New Rules
+
 Edit `config/rules.yaml`:
+
 ```yaml
 security_rules:
   my_new_rule:
@@ -348,7 +369,9 @@ security_rules:
 ```
 
 ### Adjusting Scoring
+
 Edit in `BaseAgent.calculate_score()`:
+
 ```python
 severity_weights = {
     Severity.CRITICAL: 2.0,   # Adjust these
@@ -388,6 +411,7 @@ severity_weights = {
 ## 🚀 What's Next?
 
 **Immediate Next Steps:**
+
 1. Build Dependency Agent (checks for CVEs, outdated packages)
 2. Build Code Quality Agent (complexity, code smells)
 3. Build Coordination Layer (runs all agents in parallel)
@@ -395,6 +419,7 @@ severity_weights = {
 5. Create frontend dashboard
 
 **Choose your path:**
+
 - A) Continue with Dependency Agent
 - B) Build all agents first, then coordinator
 - C) Build coordinator with just Security Agent

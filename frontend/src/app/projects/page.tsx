@@ -77,9 +77,9 @@ export default function ProjectsPage() {
       // Show success notification
       showSuccess("Your project analysis has been started successfully.");
 
-      // Navigate to analysis page after a short delay
+      // Navigate to reports page after a short delay
       setTimeout(() => {
-        router.push(`/analysis/${analysis.id}`);
+        router.push(`/reports/${analysis.id}`);
       }, 1000);
     } catch (err) {
       console.error("Failed to start analysis:", err);

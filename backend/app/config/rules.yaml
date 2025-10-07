@@ -3,7 +3,6 @@
 
 # Security Rules
 security_rules:
-  
   # SQL Injection Patterns
   sql_injection:
     severity: "critical"
@@ -17,7 +16,7 @@ security_rules:
       - "UPDATE.*?\\+.*?SET"
       - "DELETE.*?\\+.*?FROM"
     languages: ["python", "java", "php", "csharp"]
-    
+
   # XSS Patterns
   xss_vulnerability:
     severity: "high"
@@ -27,7 +26,7 @@ security_rules:
       - "eval\\(.*?\\)"
       - "dangerouslySetInnerHTML"
     languages: ["javascript", "typescript", "html"]
-    
+
   # Hardcoded Secrets
   hardcoded_secrets:
     severity: "critical"
@@ -39,7 +38,7 @@ security_rules:
       - "AWS_SECRET_ACCESS_KEY"
       - "PRIVATE_KEY"
     languages: ["*"]
-    
+
   # Weak Cryptography
   weak_crypto:
     severity: "high"
@@ -49,7 +48,7 @@ security_rules:
       - "DES\\("
       - "RC4\\("
     languages: ["python", "java", "javascript", "csharp"]
-    
+
   # Command Injection
   command_injection:
     severity: "critical"
@@ -62,25 +61,24 @@ security_rules:
 
 # Code Quality Rules
 code_quality_rules:
-  
   # Cyclomatic Complexity
   high_complexity:
     severity: "medium"
     threshold: 10
     description: "Function has too many branches"
-    
+
   # Function Length
   long_function:
     severity: "low"
     threshold: 50
     description: "Function is too long"
-    
+
   # Class Length
   long_class:
     severity: "low"
     threshold: 300
     description: "Class is too large"
-    
+
   # Code Smells
   code_smells:
     duplicate_code:
@@ -98,7 +96,6 @@ code_quality_rules:
 
 # Performance Rules
 performance_rules:
-  
   # N+1 Query Pattern
   n_plus_one_query:
     severity: "high"
@@ -106,12 +103,12 @@ performance_rules:
       - "for.*?in.*?:\\s+.*?\\.get\\("
       - "for.*?in.*?:\\s+.*?\\.filter\\("
     languages: ["python", "ruby", "javascript"]
-    
+
   # Inefficient Loops
   inefficient_loops:
     severity: "medium"
     max_nested: 3
-    
+
   # Unnecessary Computations
   unnecessary_computation:
     severity: "low"
@@ -120,36 +117,35 @@ performance_rules:
 
 # Best Practices Rules
 best_practices_rules:
-  
   # Python Best Practices
   python:
     - name: "use_with_for_files"
       pattern: "open\\(.*?\\)(?!.*?with)"
       severity: "medium"
       message: "Use 'with' statement for file operations"
-      
+
     - name: "avoid_bare_except"
       pattern: "except:\\s*$"
       severity: "medium"
       message: "Avoid bare 'except:' clauses"
-      
+
     - name: "use_is_for_none"
       pattern: "==\\s*None|None\\s*=="
       severity: "low"
       message: "Use 'is None' instead of '== None'"
-  
+
   # JavaScript Best Practices
   javascript:
     - name: "use_strict_equality"
       pattern: "==(?!=)|!=(?!=)"
       severity: "low"
       message: "Use strict equality (=== or !==)"
-      
+
     - name: "avoid_var"
       pattern: "\\bvar\\b"
       severity: "low"
       message: "Use 'let' or 'const' instead of 'var'"
-      
+
     - name: "use_async_await"
       pattern: "\\.then\\("
       severity: "info"
@@ -157,13 +153,12 @@ best_practices_rules:
 
 # Dependency Rules
 dependency_rules:
-  
   # Vulnerability Check
   vulnerability_threshold: "medium"
-  
+
   # Outdated Packages
   outdated_threshold_days: 365
-  
+
   # License Compatibility
   allowed_licenses:
     - "MIT"
@@ -173,14 +168,13 @@ dependency_rules:
     - "ISC"
     - "GPL-3.0"
     - "LGPL-3.0"
-  
+
   restricted_licenses:
     - "AGPL-3.0"
     - "GPL-2.0"
 
 # Code Style Rules
 code_style_rules:
-  
   # Python (PEP 8)
   python:
     max_line_length: 120
@@ -188,7 +182,7 @@ code_style_rules:
     use_spaces: true
     blank_lines_top_level: 2
     blank_lines_method: 1
-    
+
   # JavaScript/TypeScript
   javascript:
     max_line_length: 120
@@ -196,7 +190,7 @@ code_style_rules:
     use_spaces: true
     semicolons: true
     quotes: "single"
-    
+
   typescript:
     max_line_length: 120
     indent_size: 2
@@ -216,18 +210,17 @@ test_coverage_rules:
 
 # Documentation Rules
 documentation_rules:
-  
   # Required Documentation
   require_docstrings:
     - "public_functions"
     - "public_classes"
     - "public_methods"
-    
+
   # Docstring Format
   python:
-    style: "google"  # google, numpy, or sphinx
+    style: "google" # google, numpy, or sphinx
     min_length: 20
-    
+
   javascript:
     style: "jsdoc"
     min_length: 20

@@ -5,6 +5,7 @@
 Each agent uses a **two-tier analysis approach**:
 
 ### Tier 1: Fast Rule-Based Checks (Logic)
+
 - Pattern matching with regex
 - AST analysis for syntax
 - Static code analysis
@@ -12,6 +13,7 @@ Each agent uses a **two-tier analysis approach**:
 - **Use case:** Quick wins, obvious issues
 
 ### Tier 2: Deep LLM Analysis (Intelligence)
+
 - Context-aware understanding
 - Complex vulnerability detection
 - Code quality reasoning
@@ -28,25 +30,25 @@ class BaseAgent(ABC):
     def __init__(self, llm_service: LLMService):
         self.llm_service = llm_service
         self.use_llm = True  # Can be disabled for speed
-    
+
     async def analyze(self, file_path, file_content, language, **kwargs):
         # Tier 1: Fast rule-based analysis
         rule_issues = await self._rule_based_analysis(file_content)
-        
+
         # Tier 2: LLM-based deep analysis (if enabled)
         if self.use_llm and self._should_use_llm(file_content, rule_issues):
             llm_issues = await self._llm_based_analysis(file_content, rule_issues)
             all_issues = self._merge_issues(rule_issues, llm_issues)
         else:
             all_issues = rule_issues
-        
+
         return self._create_result(file_path, all_issues)
-    
+
     @abstractmethod
     async def _rule_based_analysis(self, content: str) -> List[Issue]:
         """Fast pattern-based checks"""
         pass
-    
+
     @abstractmethod
     async def _llm_based_analysis(
         self, content: str, rule_issues: List[Issue]
@@ -64,18 +66,20 @@ class BaseAgent(ABC):
 Each agent has specialized prompts:
 
 #### Security Agent Prompt:
-```
+
+````
 You are a security expert analyzing code for vulnerabilities.
 
 Code to analyze:
 ```{language}
 {code}
-```
+````
 
 Quick scan found these potential issues:
 {rule_based_issues}
 
 Your task:
+
 1. Verify if these issues are real vulnerabilities (not false positives)
 2. Find additional security vulnerabilities that pattern matching missed
 3. Consider:
@@ -87,27 +91,32 @@ Your task:
 
 Return JSON format:
 {
-  "verified_issues": [...],
-  "new_issues": [...],
-  "false_positives": [...]
+"verified_issues": [...],
+"new_issues": [...],
+"false_positives": [...]
 }
+
 ```
 
 #### Code Quality Agent Prompt:
 ```
+
 You are a code quality expert. Analyze this code for quality issues.
 
 Code:
+
 ```{language}
 {code}
 ```
 
 Metrics found:
+
 - Cyclomatic Complexity: {complexity}
 - Function Length: {length}
 - Nesting Depth: {nesting}
 
 Analyze for:
+
 1. Code smells (beyond metrics)
 2. Maintainability concerns
 3. Design pattern violations
@@ -115,7 +124,8 @@ Analyze for:
 5. Readability issues
 
 Suggest concrete improvements.
-```
+
+````
 
 ---
 
@@ -124,26 +134,26 @@ Suggest concrete improvements.
 ```python
 def _should_use_llm(self, content: str, rule_issues: List[Issue]) -> bool:
     """Decide if LLM analysis is worth the cost"""
-    
+
     # Always use LLM if critical issues found
     if any(i.severity == Severity.CRITICAL for i in rule_issues):
         return True
-    
+
     # Skip for very small files
     if len(content) < 100:
         return False
-    
+
     # Skip for configuration files
     if self._is_config_file(file_path):
         return False
-    
+
     # Use LLM for complex files
     if self._calculate_complexity(content) > 10:
         return True
-    
+
     # Use LLM periodically (sample 20% of files)
     return random.random() < 0.2
-```
+````
 
 ---
 
@@ -154,9 +164,9 @@ async def _llm_based_analysis(
     self, content: str, rule_issues: List[Issue]
 ) -> List[Issue]:
     """Use LLM for deep analysis"""
-    
+
     prompt = self._build_prompt(content, rule_issues)
-    
+
     # Call LLM service
     response = await self.llm_service.analyze(
         prompt=prompt,
@@ -164,10 +174,10 @@ async def _llm_based_analysis(
         temperature=0.3,  # Lower for consistent results
         max_tokens=2000
     )
-    
+
     # Parse LLM response
     llm_result = json.loads(response.content)
-    
+
     # Convert to Issue objects
     issues = []
     for item in llm_result["new_issues"]:
@@ -180,7 +190,7 @@ async def _llm_based_analysis(
             suggestion=item["suggestion"],
             rule_id=f"LLM_{item['type']}"
         ))
-    
+
     return issues
 ```
 
@@ -191,12 +201,14 @@ async def _llm_based_analysis(
 ### Security Agent (70% Logic + 30% LLM)
 
 **Logic Handles:**
+
 - SQL injection patterns
 - XSS patterns
 - Hardcoded secrets
 - Known vulnerable functions
 
 **LLM Handles:**
+
 - Business logic flaws
 - Authentication bypasses
 - Authorization issues
@@ -208,12 +220,14 @@ async def _llm_based_analysis(
 ### Code Quality Agent (50% Logic + 50% LLM)
 
 **Logic Handles:**
+
 - Cyclomatic complexity
 - Function/class length
 - Nesting depth
 - Duplicate code detection
 
 **LLM Handles:**
+
 - Code smell identification
 - Design pattern suggestions
 - Refactoring recommendations
@@ -224,11 +238,13 @@ async def _llm_based_analysis(
 ### Performance Agent (60% Logic + 40% LLM)
 
 **Logic Handles:**
+
 - N+1 query patterns
 - Nested loop detection
 - Inefficient data structures
 
 **LLM Handles:**
+
 - Algorithm efficiency
 - Caching opportunities
 - Async/await usage
@@ -239,10 +255,12 @@ async def _llm_based_analysis(
 ### Best Practices Agent (30% Logic + 70% LLM)
 
 **Logic Handles:**
+
 - Basic style violations
 - Simple anti-patterns
 
 **LLM Handles:**
+
 - Language-specific idioms
 - Framework best practices
 - Design pattern usage
@@ -253,7 +271,8 @@ async def _llm_based_analysis(
 ## 💡 LLM Prompt Templates
 
 ### Master Prompt Structure:
-```
+
+````
 ROLE: You are a {agent_type} expert analyzing {language} code.
 
 CONTEXT:
@@ -265,7 +284,7 @@ CONTEXT:
 CODE:
 ```{language}
 {code_snippet}
-```
+````
 
 QUICK SCAN RESULTS:
 {rule_based_findings}
@@ -275,28 +294,30 @@ YOUR TASK:
 
 OUTPUT FORMAT:
 {
-  "issues": [
-    {
-      "title": "Issue title",
-      "description": "Detailed explanation",
-      "severity": "critical|high|medium|low",
-      "line_number": 42,
-      "code_snippet": "problematic code",
-      "suggestion": "How to fix",
-      "confidence": 0.95,
-      "category": "security|quality|performance"
-    }
-  ],
-  "false_positives": [1, 3],  // IDs of rule-based issues that are false positives
-  "overall_assessment": "Summary of code quality",
-  "recommendations": ["General improvement suggestions"]
+"issues": [
+{
+"title": "Issue title",
+"description": "Detailed explanation",
+"severity": "critical|high|medium|low",
+"line_number": 42,
+"code_snippet": "problematic code",
+"suggestion": "How to fix",
+"confidence": 0.95,
+"category": "security|quality|performance"
+}
+],
+"false_positives": [1, 3], // IDs of rule-based issues that are false positives
+"overall_assessment": "Summary of code quality",
+"recommendations": ["General improvement suggestions"]
 }
 
 IMPORTANT:
+
 - Only report high-confidence issues (>0.7)
 - Provide specific line numbers when possible
 - Include actionable suggestions
 - Consider the full context, not just individual lines
+
 ```
 
 ---
@@ -304,33 +325,35 @@ IMPORTANT:
 ## 🔄 Analysis Flow
 
 ```
+
 Repository
-    ↓
+↓
 File Scanner
-    ↓
+↓
 Language Detector
-    ↓
+↓
 ┌─────────────────────────┐
-│   AGENT ANALYSIS        │
-│                         │
-│  1. Rule-Based (Fast)   │
-│     ├─ Pattern Match    │
-│     ├─ AST Parse        │
-│     └─ Metrics          │
-│        ↓                │
-│  2. LLM-Based (Smart)   │
-│     ├─ Build Prompt     │
-│     ├─ Call LLM         │
-│     ├─ Parse Response   │
-│     └─ Verify Issues    │
-│        ↓                │
-│  3. Merge & Dedupe      │
-│     ├─ Remove Dupes     │
-│     ├─ Filter FPs       │
-│     └─ Prioritize       │
+│ AGENT ANALYSIS │
+│ │
+│ 1. Rule-Based (Fast) │
+│ ├─ Pattern Match │
+│ ├─ AST Parse │
+│ └─ Metrics │
+│ ↓ │
+│ 2. LLM-Based (Smart) │
+│ ├─ Build Prompt │
+│ ├─ Call LLM │
+│ ├─ Parse Response │
+│ └─ Verify Issues │
+│ ↓ │
+│ 3. Merge & Dedupe │
+│ ├─ Remove Dupes │
+│ ├─ Filter FPs │
+│ └─ Prioritize │
 └─────────────────────────┘
-    ↓
+↓
 Aggregated Results
+
 ```
 
 ---
@@ -384,3 +407,4 @@ Aggregated Results
 5. **Test with real codebases**
 
 **Should I start implementing the LLM-enhanced architecture?**
+```

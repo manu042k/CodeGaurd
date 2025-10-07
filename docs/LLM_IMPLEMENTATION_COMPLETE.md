@@ -7,6 +7,7 @@
 We've successfully implemented a **two-tier analysis system** that combines:
 
 1. **Tier 1: Fast Rule-Based Analysis (Logic)**
+
    - Pattern matching with regex
    - Static code analysis
    - ⚡ Speed: 1-2ms per file
@@ -64,16 +65,16 @@ class BaseAgent(ABC):
         self.llm_service = llm_service
         self.use_llm = llm_service is not None
         self.llm_sample_rate = config.get("llm_sample_rate", 0.2)
-    
+
     async def analyze(self, file_path, file_content, language):
         # Tier 1: Rule-based (always)
         rule_result = await self._rule_based_analysis(...)
-        
+
         # Tier 2: LLM-based (smart decision)
         if self._should_use_llm(file_path, content, rule_result):
             llm_result = await self._llm_based_analysis(...)
             return self._merge_results(rule_result, llm_result)
-        
+
         return rule_result
 ```
 
@@ -84,22 +85,22 @@ def _should_use_llm(self, file_path, content, rule_result):
     # Always verify critical issues
     if has_critical_issues(rule_result):
         return True
-    
+
     # Skip small/config files
     if is_small_or_config(file_path, content):
         return False
-    
+
     # Use for complex code
     if estimate_complexity(content) > 15:
         return True
-    
+
     # Sample remaining files
     return random.random() < self.llm_sample_rate
 ```
 
 ### LLM Prompt Template
 
-```python
+````python
 prompt = f"""You are a {agent_name} expert analyzing {language} code.
 
 FILE: {file_path}
@@ -107,7 +108,7 @@ FILE: {file_path}
 CODE:
 ```{language}
 {code}
-```
+````
 
 QUICK SCAN RESULTS:
 {rule_based_findings}
@@ -126,15 +127,16 @@ OUTPUT FORMAT (JSON):
       "suggestion": "How to fix",
       "confidence": 0.95
     }}
-  ],
-  "false_positives": [0, 2],
-  "overall_assessment": "Summary",
-  "recommendations": ["Improvement 1", "Improvement 2"]
+],
+"false_positives": [0, 2],
+"overall_assessment": "Summary",
+"recommendations": ["Improvement 1", "Improvement 2"]
 }}
 
 IMPORTANT: Only report high-confidence issues (>0.7)
 """
-```
+
+````
 
 ---
 
@@ -195,7 +197,7 @@ IMPORTANT: Only report high-confidence issues (>0.7)
    - Missing encryption
 
 Focus on exploitable vulnerabilities with full context."""
-```
+````
 
 ---
 
@@ -242,21 +244,21 @@ backend/
 
 ### Speed Comparison
 
-| Approach | Time per File | Time per 1000 Files |
-|----------|--------------|---------------------|
-| Rule-based only | 1-2ms | ~2 seconds |
-| LLM-based only | 2000ms | ~33 minutes |
-| **Hybrid (20% sampling)** | **~400ms avg** | **~7 minutes** |
-| Hybrid (50% sampling) | ~1000ms avg | ~17 minutes |
+| Approach                  | Time per File  | Time per 1000 Files |
+| ------------------------- | -------------- | ------------------- |
+| Rule-based only           | 1-2ms          | ~2 seconds          |
+| LLM-based only            | 2000ms         | ~33 minutes         |
+| **Hybrid (20% sampling)** | **~400ms avg** | **~7 minutes**      |
+| Hybrid (50% sampling)     | ~1000ms avg    | ~17 minutes         |
 
 ### Cost Comparison (estimated)
 
-| Approach | Cost per 1000 Files | Accuracy |
-|----------|---------------------|----------|
-| Rule-based only | $0 | 60-70% |
-| **Hybrid (20% sampling)** | **~$0.01** | **85-90%** ⭐ |
-| Hybrid (50% sampling) | ~$0.025 | 90-95% |
-| LLM-based only | ~$0.05 | 95% |
+| Approach                  | Cost per 1000 Files | Accuracy      |
+| ------------------------- | ------------------- | ------------- |
+| Rule-based only           | $0                  | 60-70%        |
+| **Hybrid (20% sampling)** | **~$0.01**          | **85-90%** ⭐ |
+| Hybrid (50% sampling)     | ~$0.025             | 90-95%        |
+| LLM-based only            | ~$0.05              | 95%           |
 
 ### Recommended Configuration
 
@@ -264,7 +266,7 @@ backend/
 security:
   enabled: true
   use_llm: true
-  llm_sample_rate: 0.2  # Analyze 20% with LLM
+  llm_sample_rate: 0.2 # Analyze 20% with LLM
   # This gives 85-90% accuracy at <$0.01 per 1000 files
 ```
 
@@ -332,27 +334,32 @@ agent = SecurityAgent(
 ## 🎓 Key Innovations
 
 ### 1. **Smart LLM Usage**
+
 - Only uses LLM when it adds value
 - Automatic complexity detection
 - Cost optimization through sampling
 
 ### 2. **Merge & Deduplication**
+
 - Combines rule-based and LLM findings
 - Removes duplicate issues
 - Enhances rule issues with LLM insights
 
 ### 3. **Agent-Specific Prompts**
+
 - Each agent has specialized instructions
 - Security agent focuses on vulnerabilities
 - Code quality agent focuses on maintainability
 - Performance agent focuses on efficiency
 
 ### 4. **Confidence Scoring**
+
 - LLM returns confidence level per issue
 - Only reports high-confidence findings (>0.7)
 - Reduces false positives
 
 ### 5. **False Positive Detection**
+
 - LLM can identify false positives from rule-based analysis
 - Returns list of false positive IDs
 - Improves overall accuracy
@@ -385,19 +392,23 @@ Overall Progress: ~25%
 ## 🎯 Next Steps
 
 ### Option A: Continue with Agents (Recommended)
+
 Build remaining agents with hybrid approach:
+
 1. **Dependency Agent** - CVE scanning + LLM for license analysis
 2. **Code Quality Agent** - Metrics + LLM for code smells
 3. **Performance Agent** - Pattern detection + LLM for optimization
 4. **Best Practices Agent** - Basic rules + LLM for idioms
 
 ### Option B: Test with Real LLM
+
 1. Configure OpenAI/Anthropic API key
 2. Test Security Agent with real LLM calls
 3. Measure accuracy improvement
 4. Tune sampling rate based on results
 
 ### Option C: Build Coordination Layer
+
 1. Create AnalysisCoordinator
 2. Run all agents in parallel
 3. Aggregate and deduplicate results
@@ -408,12 +419,14 @@ Build remaining agents with hybrid approach:
 ## 💡 Key Advantages
 
 ### vs Rule-Based Only
+
 - ✅ 85-90% accuracy (vs 60-70%)
 - ✅ Finds complex vulnerabilities
 - ✅ Context-aware analysis
 - ✅ Business logic understanding
 
 ### vs LLM-Only
+
 - ✅ 10x faster (400ms vs 2000ms per file)
 - ✅ 5x cheaper ($0.01 vs $0.05 per 1000 files)
 - ✅ Deterministic results for simple issues
@@ -424,18 +437,22 @@ Build remaining agents with hybrid approach:
 ## 🔮 Future Enhancements
 
 1. **Fine-tuned Models**
+
    - Train specialized models for each agent
    - Further reduce costs and improve accuracy
 
 2. **Caching**
+
    - Cache LLM responses for similar code
    - Reduce repeated API calls
 
 3. **Incremental Analysis**
+
    - Only analyze changed files
    - Use git diff for efficiency
 
 4. **Confidence Calibration**
+
    - Track LLM accuracy over time
    - Adjust confidence thresholds
 
@@ -462,36 +479,42 @@ All documentation is available in `/docs/`:
 ### What We Accomplished Today
 
 ✅ **Foundation Layer** (1,700+ lines)
-   - Base agent architecture
-   - File scanner
-   - Language detector
-   - Configuration system
+
+- Base agent architecture
+- File scanner
+- Language detector
+- Configuration system
 
 ✅ **LLM Integration** (500+ lines)
-   - Hybrid analysis approach
-   - Smart LLM decision logic
-   - Prompt engineering system
-   - Result merging & deduplication
+
+- Hybrid analysis approach
+- Smart LLM decision logic
+- Prompt engineering system
+- Result merging & deduplication
 
 ✅ **Security Agent** (600+ lines)
-   - 10+ rule-based checks
-   - LLM-enhanced analysis
-   - Custom security prompts
-   - 8 language support
+
+- 10+ rule-based checks
+- LLM-enhanced analysis
+- Custom security prompts
+- 8 language support
 
 ✅ **Testing & Validation**
-   - Component tests passing
-   - LLM architecture tested
-   - Decision logic validated
-   - Configuration verified
+
+- Component tests passing
+- LLM architecture tested
+- Decision logic validated
+- Configuration verified
 
 ✅ **Documentation** (6 comprehensive guides)
-   - Architecture docs
-   - Implementation plans
-   - Progress tracking
-   - Quick references
+
+- Architecture docs
+- Implementation plans
+- Progress tracking
+- Quick references
 
 ### Total Deliverables
+
 - **Lines of Code:** ~2,800+
 - **Files Created:** 17
 - **Tests:** All passing ✅
@@ -502,6 +525,7 @@ All documentation is available in `/docs/`:
 ## 🚀 Ready for Next Phase
 
 The system is now ready for:
+
 1. ✅ Real LLM integration testing
 2. ✅ Building remaining agents
 3. ✅ Coordination layer implementation
@@ -512,5 +536,5 @@ The system is now ready for:
 
 ---
 
-*Last Updated: October 6, 2025*
-*Status: Phase 1 & 1.5 Complete ✅*
+_Last Updated: October 6, 2025_
+_Status: Phase 1 & 1.5 Complete ✅_

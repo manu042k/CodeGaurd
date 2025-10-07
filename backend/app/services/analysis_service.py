@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from app.models.database import Analysis, Project, AgentResult, User
 from app.models.schemas import AnalysisCreate, AnalysisStatusResponse, AnalysisStatus, AgentType
 from app.services.github_service import GitHubService
@@ -109,13 +109,13 @@ class AnalysisService:
             return False
         
         analysis.status = AnalysisStatus.CANCELLED
-        analysis.completed_at = datetime.utcnow()
+        analysis.completed_at = datetime.now(timezone.utc)
         
         # Update agent results
         for agent_result in analysis.agent_results:
             if agent_result.status in [AnalysisStatus.PENDING, AnalysisStatus.RUNNING]:
                 agent_result.status = AnalysisStatus.CANCELLED
-                agent_result.completed_at = datetime.utcnow()
+                agent_result.completed_at = datetime.now(timezone.utc)
         
         self.db.commit()
         return True
@@ -132,32 +132,43 @@ class AnalysisService:
             analysis.status = AnalysisStatus.RUNNING
             self.db.commit()
             
-            # Get project and repository info
+            # Get project info
             project = analysis.project
-            repository = project.repository
             
             # Clone repository to temporary directory
             temp_dir = None
             try:
                 temp_dir = tempfile.mkdtemp(prefix="codeguard_analysis_")
                 
-                github_service = GitHubService(github_token)
+                # Clone using git directly with the GitHub URL
+                import git
+                import time
                 
-                # Clone with shallow clone for faster analysis (only latest commit needed)
-                clone_result = github_service.clone_repository(
-                    repository, 
+                start_time = time.time()
+                
+                # Prepare authenticated clone URL
+                clone_url = project.github_url
+                if github_token and clone_url.startswith("https://github.com/"):
+                    # Add token to URL for authentication
+                    clone_url = clone_url.replace(
+                        "https://github.com/",
+                        f"https://{github_token}@github.com/"
+                    )
+                
+                logger.info(f"Cloning repository {project.github_full_name} to {temp_dir}")
+                
+                # Perform shallow clone
+                git.Repo.clone_from(
+                    clone_url,
                     temp_dir,
-                    shallow=True,  # Faster for analysis
                     depth=1,
-                    timeout=600  # 10 minutes max
+                    single_branch=True
                 )
                 
-                if not clone_result.success:
-                    raise Exception(f"Failed to clone repository: {clone_result.error}")
+                duration = time.time() - start_time
                 
                 logger.info(
-                    f"Repository cloned successfully: {clone_result.size_mb:.2f} MB, "
-                    f"{clone_result.duration_seconds:.2f}s"
+                    f"Repository cloned successfully in {duration:.2f}s"
                 )
                 
                 # Run each agent
@@ -183,14 +194,14 @@ class AnalysisService:
             if analysis:
                 analysis.status = AnalysisStatus.FAILED
                 analysis.error = str(e)
-                analysis.completed_at = datetime.utcnow()
+                analysis.completed_at = datetime.now(timezone.utc)
                 self.db.commit()
     
     async def _run_agent_analysis(self, agent_result: AgentResult, code_path: str, project_settings: dict):
         """Run analysis for a specific agent"""
         try:
             agent_result.status = AnalysisStatus.RUNNING
-            agent_result.started_at = datetime.utcnow()
+            agent_result.started_at = datetime.now(timezone.utc)
             self.db.commit()
             
             # For now, simulate analysis with mock results
@@ -198,7 +209,7 @@ class AnalysisService:
             await self._run_mock_analysis(agent_result, code_path, project_settings)
             
             agent_result.status = AnalysisStatus.COMPLETED
-            agent_result.completed_at = datetime.utcnow()
+            agent_result.completed_at = datetime.now(timezone.utc)
             
             if agent_result.started_at:
                 duration = (agent_result.completed_at - agent_result.started_at).total_seconds()
@@ -210,7 +221,7 @@ class AnalysisService:
             logger.error(f"Agent {agent_result.agent_name} failed: {str(e)}")
             agent_result.status = AnalysisStatus.FAILED
             agent_result.error = str(e)
-            agent_result.completed_at = datetime.utcnow()
+            agent_result.completed_at = datetime.now(timezone.utc)
             self.db.commit()
     
     async def _run_mock_analysis(self, agent_result: AgentResult, code_path: str, project_settings: dict):
@@ -249,7 +260,7 @@ class AnalysisService:
             analysis.summary = "Analysis completed with no successful agent results"
         
         analysis.status = AnalysisStatus.COMPLETED
-        analysis.completed_at = datetime.utcnow()
+        analysis.completed_at = datetime.now(timezone.utc)
         
         if analysis.started_at:
             duration = (analysis.completed_at - analysis.started_at).total_seconds()

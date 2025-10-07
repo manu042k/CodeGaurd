@@ -39,8 +39,9 @@ export default function Repositories() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Modal hooks
-  const { notifications, showError, removeNotification } = useNotifications();
+  // Notification hooks
+  const { notifications, showError, showSuccess, removeNotification } =
+    useNotifications();
 
   useEffect(() => {
     if (status === "loading") return;
@@ -103,8 +104,15 @@ export default function Repositories() {
         settings: projectData.settings,
       });
 
-      // Redirect to projects page
-      router.push("/projects?created=" + encodeURIComponent(repo.name));
+      // Show success message
+      showSuccess(
+        `Project "${repo.name}" created successfully! You can now analyze it from the projects page.`
+      );
+
+      // Redirect to projects page after a short delay
+      setTimeout(() => {
+        router.push("/projects?created=" + encodeURIComponent(repo.name));
+      }, 1500);
     } catch (err) {
       console.error("Failed to create project:", err);
       showError("Failed to create project. Please try again.");
