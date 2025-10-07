@@ -1,0 +1,233 @@
+# Analysis Rules
+# Specific rules for different types of code analysis
+
+# Security Rules
+security_rules:
+  
+  # SQL Injection Patterns
+  sql_injection:
+    severity: "critical"
+    patterns:
+      - "execute\\(.*?%.*?\\)"
+      - "executemany\\(.*?%.*?\\)"
+      - "cursor\\.execute\\(.*?\\+.*?\\)"
+      - "raw\\(.*?\\+.*?\\)"
+      - "SELECT.*?\\+.*?FROM"
+      - "INSERT.*?\\+.*?INTO"
+      - "UPDATE.*?\\+.*?SET"
+      - "DELETE.*?\\+.*?FROM"
+    languages: ["python", "java", "php", "csharp"]
+    
+  # XSS Patterns
+  xss_vulnerability:
+    severity: "high"
+    patterns:
+      - "innerHTML\\s*=.*?"
+      - "document\\.write\\(.*?\\)"
+      - "eval\\(.*?\\)"
+      - "dangerouslySetInnerHTML"
+    languages: ["javascript", "typescript", "html"]
+    
+  # Hardcoded Secrets
+  hardcoded_secrets:
+    severity: "critical"
+    patterns:
+      - "password\\s*=\\s*['\"].*?['\"]"
+      - "api_key\\s*=\\s*['\"].*?['\"]"
+      - "secret\\s*=\\s*['\"].*?['\"]"
+      - "token\\s*=\\s*['\"].*?['\"]"
+      - "AWS_SECRET_ACCESS_KEY"
+      - "PRIVATE_KEY"
+    languages: ["*"]
+    
+  # Weak Cryptography
+  weak_crypto:
+    severity: "high"
+    patterns:
+      - "md5\\("
+      - "sha1\\("
+      - "DES\\("
+      - "RC4\\("
+    languages: ["python", "java", "javascript", "csharp"]
+    
+  # Command Injection
+  command_injection:
+    severity: "critical"
+    patterns:
+      - "os\\.system\\(.*?\\+.*?\\)"
+      - "subprocess\\.call\\(.*?\\+.*?\\)"
+      - "exec\\(.*?\\+.*?\\)"
+      - "shell_exec\\("
+    languages: ["python", "php", "ruby"]
+
+# Code Quality Rules
+code_quality_rules:
+  
+  # Cyclomatic Complexity
+  high_complexity:
+    severity: "medium"
+    threshold: 10
+    description: "Function has too many branches"
+    
+  # Function Length
+  long_function:
+    severity: "low"
+    threshold: 50
+    description: "Function is too long"
+    
+  # Class Length
+  long_class:
+    severity: "low"
+    threshold: 300
+    description: "Class is too large"
+    
+  # Code Smells
+  code_smells:
+    duplicate_code:
+      severity: "medium"
+      min_lines: 5
+    magic_numbers:
+      severity: "low"
+      exclude: [0, 1, -1, 100]
+    long_parameter_list:
+      severity: "low"
+      threshold: 5
+    deep_nesting:
+      severity: "medium"
+      threshold: 4
+
+# Performance Rules
+performance_rules:
+  
+  # N+1 Query Pattern
+  n_plus_one_query:
+    severity: "high"
+    patterns:
+      - "for.*?in.*?:\\s+.*?\\.get\\("
+      - "for.*?in.*?:\\s+.*?\\.filter\\("
+    languages: ["python", "ruby", "javascript"]
+    
+  # Inefficient Loops
+  inefficient_loops:
+    severity: "medium"
+    max_nested: 3
+    
+  # Unnecessary Computations
+  unnecessary_computation:
+    severity: "low"
+    patterns:
+      - "for.*?in.*?:\\s+.*?len\\("
+
+# Best Practices Rules
+best_practices_rules:
+  
+  # Python Best Practices
+  python:
+    - name: "use_with_for_files"
+      pattern: "open\\(.*?\\)(?!.*?with)"
+      severity: "medium"
+      message: "Use 'with' statement for file operations"
+      
+    - name: "avoid_bare_except"
+      pattern: "except:\\s*$"
+      severity: "medium"
+      message: "Avoid bare 'except:' clauses"
+      
+    - name: "use_is_for_none"
+      pattern: "==\\s*None|None\\s*=="
+      severity: "low"
+      message: "Use 'is None' instead of '== None'"
+  
+  # JavaScript Best Practices
+  javascript:
+    - name: "use_strict_equality"
+      pattern: "==(?!=)|!=(?!=)"
+      severity: "low"
+      message: "Use strict equality (=== or !==)"
+      
+    - name: "avoid_var"
+      pattern: "\\bvar\\b"
+      severity: "low"
+      message: "Use 'let' or 'const' instead of 'var'"
+      
+    - name: "use_async_await"
+      pattern: "\\.then\\("
+      severity: "info"
+      message: "Consider using async/await instead of promises"
+
+# Dependency Rules
+dependency_rules:
+  
+  # Vulnerability Check
+  vulnerability_threshold: "medium"
+  
+  # Outdated Packages
+  outdated_threshold_days: 365
+  
+  # License Compatibility
+  allowed_licenses:
+    - "MIT"
+    - "Apache-2.0"
+    - "BSD-2-Clause"
+    - "BSD-3-Clause"
+    - "ISC"
+    - "GPL-3.0"
+    - "LGPL-3.0"
+  
+  restricted_licenses:
+    - "AGPL-3.0"
+    - "GPL-2.0"
+
+# Code Style Rules
+code_style_rules:
+  
+  # Python (PEP 8)
+  python:
+    max_line_length: 120
+    indent_size: 4
+    use_spaces: true
+    blank_lines_top_level: 2
+    blank_lines_method: 1
+    
+  # JavaScript/TypeScript
+  javascript:
+    max_line_length: 120
+    indent_size: 2
+    use_spaces: true
+    semicolons: true
+    quotes: "single"
+    
+  typescript:
+    max_line_length: 120
+    indent_size: 2
+    use_spaces: true
+    semicolons: true
+    quotes: "single"
+
+# Test Coverage Rules
+test_coverage_rules:
+  minimum_coverage: 80
+  critical_paths_coverage: 95
+  exclude_patterns:
+    - "test_*.py"
+    - "*.test.js"
+    - "*.spec.ts"
+    - "__init__.py"
+
+# Documentation Rules
+documentation_rules:
+  
+  # Required Documentation
+  require_docstrings:
+    - "public_functions"
+    - "public_classes"
+    - "public_methods"
+    
+  # Docstring Format
+  python:
+    style: "google"  # google, numpy, or sphinx
+    min_length: 20
+    
+  javascript:
+    style: "jsdoc"
+    min_length: 20

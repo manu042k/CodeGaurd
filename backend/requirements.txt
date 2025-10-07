@@ -28,3 +28,11 @@ google-generativeai>=0.3.0
 # LLM Utilities
 tiktoken>=0.5.0
 tenacity>=8.2.3
+
+# Code Analysis Tools
+PyYAML>=6.0.1
+bandit>=1.7.5  # Security vulnerability scanner for Python
+radon>=6.0.1  # Code complexity and metrics
+pylint>=3.0.0  # Code quality checker
+safety>=2.3.5  # Dependency vulnerability scanner
+astroid>=3.0.0  # AST parsing
