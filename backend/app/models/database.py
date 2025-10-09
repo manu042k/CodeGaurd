@@ -1,10 +1,8 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, ForeignKey, JSON, Float
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from app.core.database import Base
 import uuid
-
-Base = declarative_base()
 
 def generate_uuid():
     return str(uuid.uuid4())
@@ -36,74 +34,10 @@ class Project(Base):
     github_repo_id = Column(Integer, nullable=False)  # GitHub repository ID
     github_url = Column(String, nullable=False)       # GitHub repository URL
     github_full_name = Column(String, nullable=False) # e.g., "user/repo"
-    status = Column(String, default="never_analyzed")  # never_analyzed, analyzing, completed, failed
-    settings = Column(JSON, default=lambda: {
-        "analysisConfig": {
-            "enabledAgents": ["CodeQuality", "Security", "Architecture", "Documentation"],
-            "excludePatterns": ["node_modules", "*.test.*", "dist", "build"],
-            "includePaths": ["src", "lib", "pages", "components"]
-        },
-        "notifications": {
-            "onComplete": True,
-            "onFailure": True
-        }
-    })
-    analysis_count = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     # Relationships
     user = relationship("User", back_populates="projects")
-    analyses = relationship("Analysis", back_populates="project", cascade="all, delete-orphan")
 
-class Analysis(Base):
-    __tablename__ = "analyses"
-    
-    id = Column(String, primary_key=True, default=generate_uuid)
-    project_id = Column(String, ForeignKey("projects.id"), nullable=False)
-    status = Column(String, default="pending")  # pending, running, completed, failed, cancelled
-    started_at = Column(DateTime(timezone=True), server_default=func.now())
-    completed_at = Column(DateTime(timezone=True))
-    duration = Column(Integer)  # seconds
-    overall_score = Column(Float)
-    summary = Column(Text)
-    error = Column(Text)
-    
-    # Relationships
-    project = relationship("Project", back_populates="analyses")
-    agent_results = relationship("AgentResult", back_populates="analysis", cascade="all, delete-orphan")
 
-class AgentResult(Base):
-    __tablename__ = "agent_results"
-    
-    id = Column(String, primary_key=True, default=generate_uuid)
-    analysis_id = Column(String, ForeignKey("analyses.id"), nullable=False)
-    agent_name = Column(String, nullable=False)  # CodeQuality, Security, Architecture, Documentation
-    status = Column(String, default="pending")
-    score = Column(Float)
-    summary = Column(Text)
-    started_at = Column(DateTime(timezone=True))
-    completed_at = Column(DateTime(timezone=True))
-    duration = Column(Integer)
-    error = Column(Text)
-    
-    # Relationships
-    analysis = relationship("Analysis", back_populates="agent_results")
-    issues = relationship("Issue", back_populates="agent_result", cascade="all, delete-orphan")
-
-class Issue(Base):
-    __tablename__ = "issues"
-    
-    id = Column(String, primary_key=True, default=generate_uuid)
-    agent_result_id = Column(String, ForeignKey("agent_results.id"), nullable=False)
-    type = Column(String, nullable=False)  # error, warning, info, suggestion
-    severity = Column(String, nullable=False)  # critical, high, medium, low
-    title = Column(String, nullable=False)
-    description = Column(Text, nullable=False)
-    file_path = Column(String)
-    line_number = Column(Integer)
-    column_number = Column(Integer)
-    rule = Column(String)
-    
-    # Relationships
-    agent_result = relationship("AgentResult", back_populates="issues")

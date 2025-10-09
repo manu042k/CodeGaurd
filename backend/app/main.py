@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.routers import projects, github, auth, analyses
+from app.routers import projects, github, auth, analysis
 from app.core.database import engine
 from app.models.database import Base
 
@@ -31,7 +31,7 @@ async def health_check():
 app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
 app.include_router(projects.router, prefix=f"{settings.API_V1_STR}/projects", tags=["projects"])
 app.include_router(github.router, prefix=f"{settings.API_V1_STR}/github", tags=["github"])
-app.include_router(analyses.router, prefix=f"{settings.API_V1_STR}/analyses", tags=["analyses"])
+app.include_router(analysis.router, prefix=f"{settings.API_V1_STR}/analysis", tags=["analysis"])
 
 @app.get("/")
 async def root():

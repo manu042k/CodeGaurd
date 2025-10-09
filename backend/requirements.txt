@@ -1,38 +1,49 @@
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
+# Core FastAPI and server dependencies
+fastapi>=0.115.0
+uvicorn[standard]>=0.24.0
+
+# Database
 sqlalchemy==2.0.23
 alembic==1.12.1
 psycopg2-binary==2.9.9
+
+# Authentication and Security
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
-python-multipart==0.0.6
-httpx==0.25.2
-pydantic==2.5.0
-pydantic-settings==2.1.0
-redis==5.0.1
-celery==5.3.4
-PyGithub==2.1.1
-GitPython==3.1.40
-requests==2.31.0
+python-multipart>=0.0.9
+
+# HTTP and utilities
+httpx>=0.27.0
+requests>=2.32.4
 python-dotenv==1.0.0
-aiofiles==23.2.1
-Pillow==10.1.0
-pytest==7.4.3
-pytest-asyncio==0.21.1
 
-# LLM Providers
-openai>=1.0.0
-anthropic>=0.18.0
-google-generativeai>=0.3.0
+# Pydantic for data validation
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
 
-# LLM Utilities
-tiktoken>=0.5.0
-tenacity>=8.2.3
+# GitHub integration
+PyGithub>=2.1.1
+GitPython>=3.1.40
 
-# Code Analysis Tools
-PyYAML>=6.0.1
-bandit>=1.7.5  # Security vulnerability scanner for Python
-radon>=6.0.1  # Code complexity and metrics
-pylint>=3.0.0  # Code quality checker
-safety>=2.3.5  # Dependency vulnerability scanner
-astroid>=3.0.0  # AST parsing
+# HTTP client for API calls
+aiohttp>=3.9.0
+
+# LLM and Agent dependencies
+openai>=1.0.0  # For OpenAI-compatible API calls to Ollama
+tiktoken>=0.5.0  # For token counting
+
+# Static analysis tools
+flake8>=6.0.0
+mypy>=1.0.0
+bandit>=1.7.0
+safety>=2.0.0
+pip-audit>=2.6.0
+
+# Code analysis utilities
+radon>=6.0.0  # For complexity analysis
+vulture>=2.0.0  # For dead code detection
+lizard>=1.17.0  # For code complexity metrics
+
+# Additional utilities
+colorama>=0.4.6  # For colored terminal output
+tqdm>=4.66.0  # For progress bars

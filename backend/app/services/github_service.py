@@ -3,8 +3,24 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 from app.core.config import settings
 import logging
+import git
+import os
+import time
+from dataclasses import dataclass
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class CloneResult:
+    """Result of a repository clone operation"""
+    success: bool
+    path: Optional[str] = None
+    error: Optional[str] = None
+    size_mb: float = 0.0
+    duration_seconds: float = 0.0
+    commit_count: Optional[int] = None
 
 
 class GitHubService:
@@ -84,3 +100,105 @@ class GitHubService:
         except Exception as e:
             logger.error(f"Error fetching user info: {str(e)}")
             return None
+
+    def clone_repository(
+        self,
+        repository: Dict[str, Any],
+        target_path: str,
+        shallow: bool = True,
+        depth: Optional[int] = 1,
+    ) -> CloneResult:
+        """
+        Clone a GitHub repository to the specified path
+        
+        Args:
+            repository: Repository info dict with clone_url, private, etc.
+            target_path: Path where to clone the repository
+            shallow: Whether to do shallow clone
+            depth: Depth for shallow clone
+            
+        Returns:
+            CloneResult with success status and metadata
+        """
+        start_time = time.time()
+        clone_url = repository.get("clone_url")
+        
+        if not clone_url:
+            return CloneResult(
+                success=False,
+                error="No clone URL provided",
+                duration_seconds=time.time() - start_time,
+            )
+        
+        # Modify URL for private repos
+        if repository.get("private", False):
+            token = self.access_token
+            clone_url = clone_url.replace("https://", f"https://oauth2:{token}@")
+            logger.info("Using authenticated clone URL for private repository.")
+        
+        try:
+            logger.info(f"Cloning from {clone_url} to {target_path}")
+            
+            # Ensure target directory exists
+            os.makedirs(target_path, exist_ok=True)
+            
+            # Clone the repository
+            if shallow and depth:
+                repo = git.Repo.clone_from(clone_url, target_path, depth=depth)
+            else:
+                repo = git.Repo.clone_from(clone_url, target_path)
+            
+            # Get repository size
+            size_mb = self._get_directory_size_mb(target_path)
+            
+            # Get commit count
+            try:
+                commit_count = len(list(repo.iter_commits()))
+            except:
+                commit_count = None
+            
+            duration = time.time() - start_time
+            
+            logger.info(
+                f"Successfully cloned repository to {target_path} "
+                f"({size_mb:.2f} MB, {commit_count or '?'} commits) in {duration:.2f}s"
+            )
+            
+            return CloneResult(
+                success=True,
+                path=target_path,
+                size_mb=size_mb,
+                duration_seconds=duration,
+                commit_count=commit_count,
+            )
+            
+        except git.exc.GitCommandError as e:
+            duration = time.time() - start_time
+            error_msg = f"Git clone failed: {e.stderr}"
+            logger.error(error_msg)
+            return CloneResult(
+                success=False,
+                error=error_msg,
+                duration_seconds=duration,
+            )
+        except Exception as e:
+            duration = time.time() - start_time
+            error_msg = f"Clone failed: {str(e)}"
+            logger.error(error_msg)
+            return CloneResult(
+                success=False,
+                error=error_msg,
+                duration_seconds=duration,
+            )
+    
+    def _get_directory_size_mb(self, path: str) -> float:
+        """Calculate directory size in MB"""
+        total_size = 0
+        for dirpath, dirnames, filenames in os.walk(path):
+            for filename in filenames:
+                filepath = os.path.join(dirpath, filename)
+                try:
+                    total_size += os.path.getsize(filepath)
+                except OSError:
+                    pass
+        return total_size / (1024 * 1024)

@@ -98,17 +98,4 @@ async def delete_project(
     
     return {"message": "Project deleted successfully"}
 
-@router.get("/{project_id}/analyses")
-async def get_project_analyses(
-    project_id: str,
-    current_user: User = Depends(get_current_user_dependency),
-    db: Session = Depends(get_db)
-):
-    """Get all analyses for a project"""
-    project_service = ProjectService(db)
-    project = project_service.get_project_by_id(project_id, current_user.id)
-    
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-    
-    return project.analyses
+
