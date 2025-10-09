@@ -7,9 +7,10 @@ CodeGuard is a comprehensive code analysis platform that leverages AI agents to 
 ## ✨ Features
 
 ### 🤖 AI-Powered Analysis Agents
+
 - **Security Agent** - Identifies security vulnerabilities and potential threats
 - **Code Quality Agent** - Analyzes code quality metrics and best practices
-- **Architecture Agent** - Reviews architectural patterns and design decisions  
+- **Architecture Agent** - Reviews architectural patterns and design decisions
 - **Dependency Agent** - Manages and analyzes project dependencies
 - **Documentation Agent** - Evaluates documentation quality and coverage
 - **Trend Agent** - Tracks development trends and patterns over time
@@ -18,6 +19,7 @@ CodeGuard is a comprehensive code analysis platform that leverages AI agents to 
 - **Supervisor Agent** - Orchestrates and coordinates all analysis agents
 
 ### 🔍 Comprehensive Code Insights
+
 - Security vulnerability detection
 - Code quality metrics and recommendations
 - Architecture and design pattern analysis
@@ -27,6 +29,7 @@ CodeGuard is a comprehensive code analysis platform that leverages AI agents to 
 - Static code analysis integration
 
 ### 🔐 GitHub Integration
+
 - Seamless GitHub OAuth authentication
 - Repository access and analysis
 - Real-time synchronization with GitHub repositories
@@ -54,6 +57,7 @@ CodeGuard follows a modern microservices architecture:
 ### Technology Stack
 
 **Frontend:**
+
 - Next.js 15.5.4 with React 19
 - TypeScript for type safety
 - Tailwind CSS for styling
@@ -61,6 +65,7 @@ CodeGuard follows a modern microservices architecture:
 - React Icons for UI components
 
 **Backend:**
+
 - FastAPI for high-performance API
 - SQLAlchemy for database ORM
 - PostgreSQL for data persistence
@@ -69,6 +74,7 @@ CodeGuard follows a modern microservices architecture:
 - Pydantic for data validation
 
 **Infrastructure:**
+
 - Docker & Docker Compose for containerization
 - CORS middleware for cross-origin requests
 - Health check endpoints for monitoring
@@ -76,18 +82,21 @@ CodeGuard follows a modern microservices architecture:
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Docker and Docker Compose
 - GitHub OAuth App (for authentication)
 - Node.js 18+ (for development)
 - Python 3.11+ (for backend development)
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/yourusername/CodeGaurd.git
 cd CodeGaurd
 ```
 
 ### 2. Environment Setup
+
 Create a `.env` file in the root directory:
 
 ```env
@@ -112,6 +121,7 @@ PROJECT_NAME=CodeGuard
 ```
 
 ### 3. GitHub OAuth Setup
+
 1. Go to GitHub Settings > Developer settings > OAuth Apps
 2. Create a new OAuth App with:
    - Application name: `CodeGuard`
@@ -120,6 +130,7 @@ PROJECT_NAME=CodeGuard
 3. Copy the Client ID and Client Secret to your `.env` file
 
 ### 4. Start the Application
+
 ```bash
 # Start all services
 docker-compose up -d
@@ -129,12 +140,15 @@ docker-compose logs -f
 ```
 
 The application will be available at:
+
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8000
 - **API Documentation**: http://localhost:8000/docs
 
 ### 5. Health Check
+
 Verify the services are running:
+
 ```bash
 # Check backend health
 curl http://localhost:8000/health
@@ -146,18 +160,21 @@ docker-compose exec db pg_isready -U postgres -d codeguard
 ## 📖 Usage
 
 ### Authentication
+
 1. Navigate to http://localhost:3000
 2. Click "Sign in with GitHub"
 3. Authorize the CodeGuard application
 4. You'll be redirected to the dashboard
 
 ### Repository Analysis
+
 1. **Add Repository**: Connect your GitHub repositories
 2. **Start Analysis**: Trigger comprehensive analysis using AI agents
 3. **View Reports**: Review detailed analysis results and recommendations
 4. **Track Trends**: Monitor code quality and security trends over time
 
 ### API Usage
+
 The backend provides a comprehensive REST API:
 
 ```bash
@@ -178,6 +195,7 @@ GET /api/v1/analysis/{analysis_id}/results
 ## 🛠️ Development
 
 ### Frontend Development
+
 ```bash
 cd frontend
 npm install
@@ -185,6 +203,7 @@ npm run dev
 ```
 
 ### Backend Development
+
 ```bash
 cd backend
 pip install -r requirements.txt
@@ -192,6 +211,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### Database Migrations
+
 ```bash
 # Create new migration
 docker-compose exec backend alembic revision --autogenerate -m "Description"
@@ -200,34 +220,16 @@ docker-compose exec backend alembic revision --autogenerate -m "Description"
 docker-compose exec backend alembic upgrade head
 ```
 
-## 🧪 Testing
-
-### Backend Tests
-```bash
-cd backend
-pytest tests/
-```
-
-### Frontend Tests
-```bash
-cd frontend
-npm test
-```
-
-### Integration Tests
-```bash
-# Run full test suite
-docker-compose -f docker-compose.test.yml up --build
-```
-
 ## 📊 Monitoring
 
 ### Health Checks
+
 - Backend: `GET /health`
 - Database: Built-in PostgreSQL health checks
 - Frontend: Next.js built-in health monitoring
 
 ### Logs
+
 ```bash
 # View all logs
 docker-compose logs -f
@@ -244,16 +246,9 @@ docker-compose logs -f db
 - **Issues**: [GitHub Issues](https://github.com/yourusername/CodeGaurd/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/yourusername/CodeGaurd/discussions)
 
-## 🙏 Acknowledgments
 
-- FastAPI for the excellent Python web framework
-- Next.js for the powerful React framework
-- GitHub for the comprehensive API
-- All contributors and open-source projects that made this possible
 
----
-
-**CodeGuard** - Protecting your code with intelligent analysis 🛡️ 
+**CodeGuard** - Protecting your code with intelligent analysis 🛡️
 
 ## 🚧 Limitations
 
