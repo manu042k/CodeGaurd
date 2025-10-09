@@ -240,13 +240,6 @@ docker-compose logs -f frontend
 docker-compose logs -f db
 ```
 
-## 🆘 Support
-
-- **Documentation**: [Wiki](https://github.com/yourusername/CodeGaurd/wiki)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/CodeGaurd/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/CodeGaurd/discussions)
-
-
 
 **CodeGuard** - Protecting your code with intelligent analysis 🛡️
 
