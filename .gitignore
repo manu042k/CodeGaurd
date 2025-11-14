@@ -220,3 +220,31 @@ celerybeat.pid
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# LLM folder - generated data
+llm/data/
+llm/repos/
+llm/models/
+llm/logs/
+llm/venv/
+llm/*.db
+llm/*.index
+llm/*.hnsw
+llm/.env.backup
+
+# Model cache folders (root level)
+models/
+.locks/
+
+# Data folders (generated data)
+data/
+
+# Vector indexes and embeddings
+*.index
+*.index.meta
+*.hnsw
+*.faiss
+*.npy
+*.npz
+*.pkl
+*.pickle

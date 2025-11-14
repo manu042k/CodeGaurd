@@ -5,14 +5,21 @@ import os
 import tempfile
 import shutil
 from typing import Dict, Any, List, Optional
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Query, Path
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Query, Path, Depends
+from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from git import Repo
 from app.services.results_aggregator import results_aggregator
+from app.core.database import get_db
+from app.routers.auth import get_current_user_dependency
+from app.models.database import User
 
 router = APIRouter()
 
 # Request/Response Models
+class ProjectAnalysisRequest(BaseModel):
+    project_id: str
+
 class AnalysisRequest(BaseModel):
     repo_url: str
     branch: Optional[str] = "main"
@@ -34,6 +41,166 @@ class ResultSummary(BaseModel):
     success: bool
     agents_executed: List[str]
     total_issues: int
+
+# Project-based analysis endpoints (for frontend compatibility)
+@router.post("/")
+async def start_project_analysis(
+    request: ProjectAnalysisRequest,
+    current_user: User = Depends(get_current_user_dependency),
+    db: Session = Depends(get_db)
+):
+    """Start analysis for a project"""
+    # For now, return a placeholder response
+    # TODO: Implement actual project-based analysis
+    return {
+        "id": request.project_id,
+        "project_id": request.project_id,
+        "status": "pending",
+        "message": "Analysis endpoint is under construction. Please use the repository analysis feature."
+    }
+
+@router.get("/{analysis_id}/")
+async def get_project_analysis(
+    analysis_id: str,
+    current_user: User = Depends(get_current_user_dependency),
+    db: Session = Depends(get_db)
+):
+    """Get analysis details by ID"""
+    # For now, return a mock analysis response
+    # TODO: Implement actual analysis retrieval from database
+    from datetime import datetime
+    return {
+        "id": analysis_id,
+        "project_id": "mock-project-id",
+        "status": "completed",
+        "started_at": datetime.utcnow().isoformat(),
+        "completed_at": datetime.utcnow().isoformat(),
+        "duration": 120,
+        "overall_score": 0.85,
+        "summary": "Analysis completed successfully. This is a placeholder response while the full analysis system is being implemented.",
+        "agent_results": [
+            {
+                "id": f"{analysis_id}-code-quality",
+                "agent_name": "CodeQuality",
+                "status": "completed",
+                "score": 0.88,
+                "summary": "Code quality is good overall. Found 3 minor issues that could be improved.",
+                "started_at": datetime.utcnow().isoformat(),
+                "completed_at": datetime.utcnow().isoformat(),
+                "duration": 30,
+                "issues": [
+                    {
+                        "id": "cq-1",
+                        "type": "warning",
+                        "severity": "medium",
+                        "title": "Complex function detected",
+                        "description": "Function has high cyclomatic complexity. Consider refactoring.",
+                        "file_path": "src/utils/helper.py",
+                        "line_number": 45,
+                        "rule": "complexity"
+                    },
+                    {
+                        "id": "cq-2",
+                        "type": "info",
+                        "severity": "low",
+                        "title": "Missing type hints",
+                        "description": "Function parameters should have type hints for better code documentation.",
+                        "file_path": "src/utils/helper.py",
+                        "line_number": 45,
+                        "rule": "type-hints"
+                    }
+                ]
+            },
+            {
+                "id": f"{analysis_id}-security",
+                "agent_name": "Security",
+                "status": "completed",
+                "score": 0.92,
+                "summary": "No critical security vulnerabilities found. Application follows security best practices.",
+                "started_at": datetime.utcnow().isoformat(),
+                "completed_at": datetime.utcnow().isoformat(),
+                "duration": 45,
+                "issues": [
+                    {
+                        "id": "sec-1",
+                        "type": "suggestion",
+                        "severity": "low",
+                        "title": "Consider using environment variables",
+                        "description": "Hardcoded configuration values should be moved to environment variables.",
+                        "file_path": "src/config.py",
+                        "line_number": 12,
+                        "rule": "hardcoded-config"
+                    }
+                ]
+            },
+            {
+                "id": f"{analysis_id}-architecture",
+                "agent_name": "Architecture",
+                "status": "completed",
+                "score": 0.80,
+                "summary": "Good architectural patterns. Some improvements can be made in module organization.",
+                "started_at": datetime.utcnow().isoformat(),
+                "completed_at": datetime.utcnow().isoformat(),
+                "duration": 25,
+                "issues": [
+                    {
+                        "id": "arch-1",
+                        "type": "warning",
+                        "severity": "medium",
+                        "title": "Circular dependency detected",
+                        "description": "Module A imports Module B which imports Module A. This can lead to initialization issues.",
+                        "file_path": "src/modules/",
+                        "rule": "circular-dependency"
+                    }
+                ]
+            },
+            {
+                "id": f"{analysis_id}-documentation",
+                "agent_name": "Documentation",
+                "status": "completed",
+                "score": 0.78,
+                "summary": "Documentation coverage could be improved. Some functions lack docstrings.",
+                "started_at": datetime.utcnow().isoformat(),
+                "completed_at": datetime.utcnow().isoformat(),
+                "duration": 20,
+                "issues": [
+                    {
+                        "id": "doc-1",
+                        "type": "info",
+                        "severity": "low",
+                        "title": "Missing function documentation",
+                        "description": "Public functions should have docstrings explaining their purpose and parameters.",
+                        "file_path": "src/services/analysis.py",
+                        "line_number": 78,
+                        "rule": "missing-docstring"
+                    },
+                    {
+                        "id": "doc-2",
+                        "type": "info",
+                        "severity": "low",
+                        "title": "Outdated README",
+                        "description": "README.md has not been updated to reflect recent changes.",
+                        "file_path": "README.md",
+                        "rule": "outdated-docs"
+                    }
+                ]
+            }
+        ]
+    }
+
+@router.get("/{analysis_id}/status/")
+async def get_analysis_status(
+    analysis_id: str,
+    current_user: User = Depends(get_current_user_dependency),
+    db: Session = Depends(get_db)
+):
+    """Get analysis status"""
+    # For now, return a placeholder response
+    return {
+        "status": "pending",
+        "progress": 0,
+        "message": "Analysis status endpoint is under construction."
+    }
 
 @router.post("/analyze", response_model=AnalysisResponse)
 async def start_analysis(

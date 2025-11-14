@@ -1,0 +1,26 @@
+# LangGraph and LangChain
+langgraph==0.2.28
+langchain==0.3.1
+langchain-google-genai==2.0.0
+langchain-community==0.3.1
+
+# Embedding and Vector Store
+sentence-transformers==3.1.1
+hnswlib==0.8.0
+torch>=2.0.0
+transformers==4.45.2
+
+# Database
+aiosqlite==0.20.0
+
+# Git and Repository Handling
+gitpython==3.1.43
+
+# Utilities
+python-dotenv==1.0.1
+pydantic==2.9.2
+pydantic-settings==2.5.2
+tenacity<9.0.0,>=8.1.0
+
+# Logging
+loguru==0.7.2

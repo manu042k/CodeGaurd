@@ -7,7 +7,6 @@ from .code_quality_agent import CodeQualityAgent
 from .security_agent import SecurityAgent
 from .architecture_agent import ArchitectureAgent
 from .documentation_agent import DocumentationAgent
-from .testing_agent import TestingAgent
 from .dependency_agent import DependencyAgent
 from .static_tool_agent import StaticToolAgent
 from .summary_agent import SummaryAgent
@@ -19,8 +18,7 @@ __all__ = [
     'CodeQualityAgent',
     'SecurityAgent',
     'ArchitectureAgent',
-    'DocumentationAgent', 
-    'TestingAgent',
+    'DocumentationAgent',
     'DependencyAgent',
     'StaticToolAgent',
     'SummaryAgent',

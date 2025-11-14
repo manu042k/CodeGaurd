@@ -32,6 +32,8 @@ app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["aut
 app.include_router(projects.router, prefix=f"{settings.API_V1_STR}/projects", tags=["projects"])
 app.include_router(github.router, prefix=f"{settings.API_V1_STR}/github", tags=["github"])
 app.include_router(analysis.router, prefix=f"{settings.API_V1_STR}/analysis", tags=["analysis"])
+# Add plural form for compatibility with frontend
+app.include_router(analysis.router, prefix=f"{settings.API_V1_STR}/analyses", tags=["analyses"])
 
 @app.get("/")
 async def root():
